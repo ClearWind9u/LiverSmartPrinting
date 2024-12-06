@@ -1,14 +1,19 @@
 import * as React from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "../redux/userSlice";
+
 import Logo from "../../assets/Logo.png"; // Đường dẫn tương đối tới tệp PNG
 import HomeIcon from '@mui/icons-material/Home';
 import PrintIcon from '@mui/icons-material/Print';
 import ArticleIcon from '@mui/icons-material/Article';
 import PersonIcon from '@mui/icons-material/Person';
 
+
 const Header = ({ role }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dispatch = useDispatch();
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
@@ -76,16 +81,14 @@ const Header = ({ role }) => {
             <div className="absolute top-0 right-0 bg-white text-black rounded shadow-lg">
               <ul className="flex flex-col py-2">
 
-                <li className="px-4 py-2 hover:bg-gray-100">
-                  <Link to="/register">Register</Link>
-                </li>
-                <li className="px-4 py-2 hover:bg-gray-100">
-                  <Link to="/logout">Logout</Link>
-                </li>
-
-                <li className="px-4 py-2 hover:bg-gray-100">
+                <div className="px-4 py-2 hover:bg-gray-100">
                   <Link to="/profile">Profile</Link>
-                </li>
+                </div>
+
+                <div className="px-4 py-2 hover:bg-gray-100"
+                  onClick={() => dispatch(loginSuccess(null))}>
+                  <Link to="/">Log out</Link>
+                </div>
               </ul>
             </div>
           )}
