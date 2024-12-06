@@ -1,6 +1,5 @@
 import express from "express";
 import Printer from "../models/printer.js";
-import VerifyToken from "../middleware/auth.js";
 
 const router = express.Router();
 

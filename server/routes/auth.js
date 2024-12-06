@@ -28,13 +28,7 @@ router.post('/register', async (req, res) => {
       const hashedPassword = await argon2.hash(password);
       const newUser = new User({ email, password: hashedPassword, role });
       await newUser.save();
-  
-      // Trả về token
-      const accessToken = jwt.sign(
-        { userId: newUser._id, role: newUser.role },
-        process.env.ACCESS_TOKEN_SECRET
-      );
-      res.json({ success: true, message: 'User created successfully', accessToken });
+      res.json({ success: true, message: 'User created successfully' });
     } catch (error) {
       console.error(error);
       res.status(500).json({ success: false, message: 'Internal server error' });
@@ -64,12 +58,7 @@ router.post('/register', async (req, res) => {
         return res.status(200).json({ success: false, message: 'Incorrect password' });
       }
   
-      // Trả về token
-      const accessToken = jwt.sign(
-        { userId: user._id, role: user.role },
-        process.env.ACCESS_TOKEN_SECRET
-      );
-      res.json({ success: true, message: 'User logged in successfully', user, accessToken });
+      res.json({ success: true, message: 'User logged in successfully', user });
     } catch (error) {
       console.error(error);
       res.status(400).json({ success: false, message: 'Internal server error' });

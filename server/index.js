@@ -7,6 +7,7 @@ dotenv.config();
 
 import authRouter from "./routes/auth.js";
 import printerRouter from "./routes/printer.js"
+import historyRouter from "./routes/history.js"
 
 const app = express();
 app.use(cors());
@@ -31,6 +32,7 @@ connectDB();
 
 app.use('/', authRouter);
 app.use('/printers', printerRouter);
+app.use('/histories', historyRouter);
 
 const PORT = 5000;
 
