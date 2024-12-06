@@ -24,7 +24,7 @@ const PrinterCard = ({ printer, userRole }) => {
           to={`/printer/${printer._id}`}
           className="bg-[#f05258] text-white px-4 py-1 rounded-full w-[120px]"
         >
-          Select printer
+          Select
         </Link>
         <button
           className="bg-[#1f89db] text-white px-4 py-1 rounded-full w-[120px]"
@@ -65,17 +65,15 @@ const PrinterCard = ({ printer, userRole }) => {
                       checked={isEnabled}
                       onChange={handleToggle}
                     />
-                    <div className={`block w-14 h-8 rounded-full ${
-                        isEnabled
-                          ? "bg-green-500"
-                          : "bg-gray-600"
+                    <div className={`block w-14 h-8 rounded-full ${isEnabled
+                        ? "bg-green-500"
+                        : "bg-gray-600"
                       }`}></div>
                     <div
-                      className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${
-                        isEnabled
+                      className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${isEnabled
                           ? "transform translate-x-full bg-green-500"
                           : ""
-                      }`}
+                        }`}
                     ></div>
                   </div>
                   <div className="ml-3 text-gray-600 font-medium">

@@ -4,14 +4,14 @@ import { Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 function App({ role }) {
-  const user = useSelector((state) => state.auth.login?.currentUser); 
+  const user = useSelector((state) => state.auth.login?.currentUser);
   const userRole = user.role; // This should be dynamically set based on the logged-in user
   const bgColor =
     userRole === "admin" ? "from-white to-red-300" : "from-white to-blue-300";
 
   return (
     <>
-      <div className="container w-[1400px] mx-auto items-center text-[15px]">
+      <div className="w-full h-screen">
         <Header role={userRole} />
         <main className={`h-[750px] bg-gradient-to-b ${bgColor}`}>
           <Outlet />

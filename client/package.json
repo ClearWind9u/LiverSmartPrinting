@@ -11,6 +11,10 @@
         "css": "npx tailwindcss -i ./src/input.css -o ./src/output.css --watch"
     },
     "dependencies": {
+        "@emotion/react": "^11.13.5",
+        "@emotion/styled": "^11.13.5",
+        "@mui/icons-material": "^6.1.10",
+        "@mui/material": "^6.1.10",
         "@reduxjs/toolkit": "^2.4.0",
         "axios": "^1.7.9",
         "framer-motion": "^11.11.17",
