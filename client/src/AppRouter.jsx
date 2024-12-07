@@ -11,13 +11,14 @@ import ConfigPage from "./components/ConfigPage";
 import ReportPage from "./components/ReportPage";
 import BuyPage from "./components/BuyPage";
 import { useSelector } from "react-redux";
+import Profile from "./components/Profile";
 
 const AppRouter = () => {
-  const user = useSelector((state) => state.auth.login?.currentUser); 
+  const user = useSelector((state) => state.auth.login?.currentUser);
   return (
     <Router>
       <Routes>
-        <Route exact path="/" element={user?<App/>:<LoginForm/>}>
+        <Route exact path="/" element={user ? <App /> : <LoginForm />}>
           <Route index element={<Home />} />
           <Route path="/printers" element={<PrinterGrid />} />
           <Route path="/printer/:id" element={<PrinterForm />} />
@@ -27,6 +28,7 @@ const AppRouter = () => {
           <Route path="/pages" element={<BuyPage />} />
           <Route path="/buy-paper" element={<BuyPage />} />
           <Route path="*" element={<NotFound />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
       </Routes>
     </Router>

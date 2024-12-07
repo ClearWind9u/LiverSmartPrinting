@@ -14,31 +14,28 @@ const ReportPage = () => {
         </h1>
         <div className="flex justify-center mb-8">
           <button
-            className={`px-6 py-3 mx-2 transition-colors duration-300 ${
-              activeTab === "printing"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-200 text-gray-800"
-            } rounded-full shadow-md hover:bg-blue-500`}
+            className={`px-6 py-3 mx-2 transition-colors duration-300 ${activeTab === "printing"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-200 text-gray-800"
+              } rounded-full shadow-md hover:bg-blue-500`}
             onClick={() => setActiveTab("printing")}
           >
             Printing Log
           </button>
           <button
-            className={`px-6 py-3 mx-2 transition-colors duration-300 ${
-              activeTab === "payment"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-200 text-gray-800"
-            } rounded-full shadow-md hover:bg-blue-500`}
+            className={`px-6 py-3 mx-2 transition-colors duration-300 ${activeTab === "payment"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-200 text-gray-800"
+              } rounded-full shadow-md hover:bg-blue-500`}
             onClick={() => setActiveTab("payment")}
           >
             Payment Log
           </button>
           <button
-            className={`px-6 py-3 mx-2 transition-colors duration-300 ${
-              activeTab === "account"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-200 text-gray-800"
-            } rounded-full shadow-md hover:bg-blue-500`}
+            className={`px-6 py-3 mx-2 transition-colors duration-300 ${activeTab === "account"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-200 text-gray-800"
+              } rounded-full shadow-md hover:bg-blue-500`}
             onClick={() => setActiveTab("account")}
           >
             Account Management
