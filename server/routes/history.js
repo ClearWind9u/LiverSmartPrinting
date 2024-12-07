@@ -114,23 +114,6 @@ router.post('/create', async (req, res) => {
     }
 });
 
-//Update a history
-router.put('/:id', async (req, res) => {
-    const { name, price, type, image, information } = req.body
-    try {
-        let updatedHistory = { name, price, type, image, information };
-        const postUpdateCondition = { _id: req.params.id };
-        updatedHistory = await History.findOneAndUpdate(postUpdateCondition, updatedHistory, { new: true });
-        //User not authorised to update history
-        if (!updatedHistory)
-            return res.status(401).json({ success: false, message: 'History not found or user not authorise' })
-        res.json({ success: true, message: 'Excellent progress!', updatedHistory });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ success: false, message: 'Internal server error' })
-    }
-});
-
 //Delete a history
 router.delete('/:id', async (req, res) => {
     try {

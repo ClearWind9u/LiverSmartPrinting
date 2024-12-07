@@ -11,6 +11,7 @@ import userRouter from "./routes/user.js";
 import printerRouter from "./routes/printer.js";
 import historyRouter from "./routes/history.js";
 import buyPageRouter from "./routes/buypage.js";
+import balancePageRouter from "./routes/balance.js";
 
 const app = express();
 app.use(cors());
@@ -37,6 +38,7 @@ app.use('/', userRouter);
 app.use('/printers', printerRouter);
 app.use('/histories', historyRouter);
 app.use('/pages', buyPageRouter);
+app.use('/balance', balancePageRouter);
 
 // Phục vụ các file tĩnh trong thư mục 'uploads'
 // app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));

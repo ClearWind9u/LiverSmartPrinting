@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const BuyPageSchema = new Schema({
     type: {
         type: String,
-        enum: ['A1', 'A2', 'A3', 'A4', 'A5'],
+        enum: ['A0', 'A1', 'A2', 'A3', 'A4', 'A5'],
         default: 'A4',
     },
     quantity: {

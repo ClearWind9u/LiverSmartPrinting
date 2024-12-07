@@ -12,10 +12,12 @@ const balancePageSchema = new Schema({
       type: Number,
       required: true,
   },
-  initialBalance: {
+  balance: {
       type: Number,
       default: 0,
   }
 });
 
-export default balancePageSchema;
+const BalancePage = mongoose.model('balancepages', balancePageSchema);
+
+export default BalancePage;
