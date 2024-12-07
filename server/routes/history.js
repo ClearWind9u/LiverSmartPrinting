@@ -3,50 +3,90 @@ import History from "../models/history.js";
 
 const router = express.Router();
 
-//View histories
+//View all histories
 router.get('/', async (req, res) => {
     try {
-        const historys = await History.find();
-        res.json({ success: true, historys });
+        const histories = await History.find();
+        res.json({ success: true, histories });
     } catch (error) {
         console.log(error);
         res.status(500).json({ success: false, message: 'Internal server error' })
     }
 });
 
-//View history with id
-router.get('/:id', async (req, res) => {
-    const id = req.params.id;
+// View history by userId
+router.get('/user/:userId', async (req, res) => {
+    const userId = req.params.userId;
+
     try {
-        const history = await History.findById(id);
-        res.json({ success: true, history });
+        // Tìm lịch sử theo userId
+        const history = await History.find({ userId });
+        // Nếu không có lịch sử, trả về thông báo
+        if (!history || history.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'No history found for this user',
+            });
+        }
+        // Trả về dữ liệu lịch sử
+        res.status(200).json({ success: true, history });
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ success: false, message: 'Internal server error' })
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+        });
+    }
+});
+
+// View history by printerId
+router.get('/printer/:printerId', async (req, res) => {
+    const printerId = req.params.printerId;
+
+    try {
+        // Tìm lịch sử theo printerId
+        const history = await History.find({ printerId });
+        // Nếu không có lịch sử, trả về thông báo
+        if (!history || history.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'No history found for this printer',
+            });
+        }
+        // Trả về dữ liệu lịch sử
+        res.status(200).json({ success: true, history });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+        });
     }
 });
 
 // Create a history
 router.post('/create', async (req, res) => {
-    const { fileUrl, noCopy, orientation, multiplePage, size, pageRange, userId, printerId } = req.body;
+    const { fileName, noCopy, colorMode, orientation, multiplePage, size, pageRange, side, userId, printerId } = req.body;
 
     try {
         // Kiểm tra các thông tin cần thiết
-        if (!fileUrl || !noCopy || !orientation || !size || !userId || !printerId) {
+        if (!fileName || !noCopy || !colorMode || !orientation || !size || !userId || !printerId) {
             return res.status(400).json({
                 success: false,
-                message: 'Missing required fields: fileUrl, noCopy, orientation, size, userId, printerId',
+                message: 'Missing required fields: fileName, noCopy, colorMode, orientation, size, userId, printerId',
             });
         }
 
         // Tạo đối tượng printInfo dựa trên dữ liệu đầu vào
         const printInfo = {
-            fileUrl,
+            fileName,
             noCopy,
+            colorMode,
             orientation,
             multiplePage,
             size,
             pageRange, 
+            side,
             time: Date.now(), 
         };
 
@@ -107,4 +147,3 @@ router.delete('/:id', async (req, res) => {
 });
 
 export default router;
-

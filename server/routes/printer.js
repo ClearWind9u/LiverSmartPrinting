@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-//View printer with id
+//View printer by printerId
 router.get('/:id', async (req, res) => {
     const id = req.params.id;
     try {

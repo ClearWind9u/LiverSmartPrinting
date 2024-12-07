@@ -1,8 +1,13 @@
 import mongoose from "mongoose";
+import balancePageSchema from "./balance";
 
 const Schema = mongoose.Schema;
 
 const UserSchema = new Schema({
+  username: {
+    type: String,
+    required: true,
+  },
   email: {
     type: String,
     required: true,
@@ -19,7 +24,11 @@ const UserSchema = new Schema({
   role: {
     type: String,
     enum: ['user', 'admin'],
-    default: 'user', // Đặt giá trị mặc định là 'user'
+    default: 'user',
+  },
+  balancePage: {
+      type: [balancePageSchema],
+      default: []
   },
   createdAt: {
     type: Date,
@@ -28,6 +37,5 @@ const UserSchema = new Schema({
 });
 
 const User = mongoose.model('users', UserSchema);
-
 
 export default User;
