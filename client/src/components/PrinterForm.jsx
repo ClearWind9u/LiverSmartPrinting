@@ -16,7 +16,7 @@ const PrinterForm = () => {
   const [pageSize, setPageSize] = useState("A4");
   const [pageRange, setPageRange] = useState("all");
   const [printSides, setPrintSides] = useState("one");
-  const [remainingPaper, setRemainingPaper] = useState(100); // Example remaining paper
+  const [balancePage, setBalancePage] = useState(0);
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.login?.currentUser);
 
@@ -37,19 +37,58 @@ const PrinterForm = () => {
     fetchPrinter();
   }, []);
 
+  useEffect(() => {
+    const fetchBalance = async () => {
+      try {
+        // Gọi API lấy số dư
+        const response = await axios.get(`http://localhost:5000/balance/${pageSize}/${user._id}`);
+        
+        if (response.data.success) {
+          setBalancePage(response.data.data.balance || 0);
+        } else {
+          setBalancePage(0); // Nếu không tìm thấy loại giấy, đặt số dư về 0
+        }
+      } catch (error) {
+        console.error("Error fetching balance:", error);
+        setBalancePage(-1); // Trường hợp lỗi
+      }
+    };
+    if (user?._id) {
+      fetchBalance();
+    }
+  }, [pageSize, user]);
+  
   const handlePrint = async (e) => {
     e.preventDefault();
-
+  
     if (!file) {
       alert("No file selected. Please upload a file before printing.");
       return;
     }
-
+  
     if (copies <= 0) {
       alert("Number of copies must be greater than 0.");
       return;
     }
+  
+    if (balancePage < copies) {
+      alert(`Insufficient balance for ${pageSize} paper. Please add more pages.`);
+      return;
+    }
+  
     try {
+      // Gửi yêu cầu trừ số dư trang
+      const updateBalanceResponse = await axios.put(`http://localhost:5000/update-balance/${user._id}`, {
+        pageSize,
+        changePage: -copies, // Số trang cần trừ
+      });
+  
+      if (!updateBalanceResponse.data.success) {
+        alert("Failed to update page balance. Please try again.");
+        return;
+      }
+  
+      // Tạo dữ liệu in
       const printData = {
         fileName: file.name,
         noCopy: copies,
@@ -61,11 +100,11 @@ const PrinterForm = () => {
         userId: user._id,
         printerId: id,
       };
-
+  
       const response = await axios.post("http://localhost:5000/histories/create", printData, {
         headers: { "Content-Type": "application/json" },
       });
-
+  
       if (response.data.success) {
         alert("Print job created successfully!");
         navigate("/printers");
@@ -76,14 +115,13 @@ const PrinterForm = () => {
       console.error("Error during print:", error);
       alert("An error occurred while processing the print job.");
     }
-  };
+  };  
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
       setFilePreviewUrl(URL.createObjectURL(selectedFile)); // Tạo URL xem trước file
-      console.log("Selected file name:", selectedFile.name); // Ghi log để kiểm tra
     }
   };
 
@@ -185,10 +223,12 @@ const PrinterForm = () => {
                   onChange={(e) => setPageSize(e.target.value)}
                   className="border rounded w-full p-2"
                 >
-                  <option>A4</option>
+                  <option>A0</option>
+                  <option>A1</option>
+                  <option>A2</option>
                   <option>A3</option>
-                  <option>Letter</option>
-                  <option>Legal</option>
+                  <option>A4</option>
+                  <option>A5</option>
                 </select>
               </div>
 
@@ -261,9 +301,9 @@ const PrinterForm = () => {
               <Link
                 to="/buy-paper"
                 className="px-4 py-2 bg-green-500 text-white rounded">
-                Buy Paper
+                Buy Pages
               </Link>
-              <span className="ml-4">Remaining paper: {remainingPaper}</span>
+              <span className="ml-4">Balance Pages: {balancePage}</span>
             </div>
           </div>
         </div>

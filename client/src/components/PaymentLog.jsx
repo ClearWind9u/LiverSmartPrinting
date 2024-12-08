@@ -1,44 +1,41 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const PaymentLog = () => {
-  const paymentLog = [
-    {
-      id: 1,
-      paperType: "A4",
-      quantity: 100,
-      totalPrice: "$10.00",
-      date: "2023-10-01",
-    },
-    {
-      id: 2,
-      paperType: "A3",
-      quantity: 50,
-      totalPrice: "$25.00",
-      date: "2023-10-02",
-    },
-    {
-      id: 3,
-      paperType: "A2",
-      quantity: 30,
-      totalPrice: "$24.00",
-      date: "2023-10-03",
-    },
-    {
-      id: 4,
-      paperType: "A1",
-      quantity: 20,
-      totalPrice: "$20.00",
-      date: "2023-10-04",
-    },
-    {
-      id: 5,
-      paperType: "A5",
-      quantity: 200,
-      totalPrice: "$10.00",
-      date: "2023-10-05",
-    },
-    // Add more payment log entries here
-  ];
+  const [paymentLog, setPaymentLog] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchPaymentLogs = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/pages");
+        if (response.data.success) {
+          // Ánh xạ dữ liệu từ API
+          const logs = response.data.buypages.map((log, index) => ({
+            id: `${log._id}`, // Tạo ID duy nhất
+            paperType: log.type,
+            quantity: log.quantity,
+            totalPrice: `${log.totalPrice} VNĐ`, // Định dạng giá
+            date: new Date(log.time).toLocaleDateString(), // Định dạng ngày
+          }));
+          setPaymentLog(logs);
+        } else {
+          setError("Failed to fetch payment logs");
+        }
+      } catch (err) {
+        console.error(err);
+        setError("An error occurred while fetching payment logs");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPaymentLogs();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
 
   return (
     <div>

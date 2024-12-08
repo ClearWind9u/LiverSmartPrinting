@@ -26,35 +26,51 @@ const BuyPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
+    // Kiểm tra đầu vào
+    if (!paperType) {
+      alert("Please select a paper type.");
+      return;
+    }
+  
+    if (!quantity || quantity <= 0) {
+      alert("Quantity must be greater than 0.");
+      return;
+    }
+  
     const totalPrice = price * quantity;
-
+  
     try {
-      // Sử dụng Axios để gửi yêu cầu POST
+      // Gửi yêu cầu POST để tạo giao dịch mua
       const response = await axios.post("http://localhost:5000/pages/create", {
         type: paperType,
         quantity,
         totalPrice,
         userId: user._id,
       });
-
+  
       if (response.data.success) {
-      // Gửi yêu cầu PUT để cập nhật balancePage
-      const balanceUpdateResponse = await axios.put(`http://localhost:5000/update-balance/${user._id}`, {
-        addPage: Number(quantity),
-      });
-      if (balanceUpdateResponse.data.success) {
-        alert("Purchase successful!");
+        // Gửi yêu cầu PUT để cập nhật balancePage
+        const balanceUpdateResponse = await axios.put(`http://localhost:5000/update-balance/${user._id}`, {
+          pageSize: paperType, // Thêm loại giấy
+          changePage: Number(quantity), // Thêm số lượng trang
+        });
+  
+        if (balanceUpdateResponse.data.success) {
+          alert("Purchase successful! Balance updated.");
+        } else {
+          console.error("Balance update error:", balanceUpdateResponse.data.message);
+          alert(`Purchase successful, but balance update failed: ${balanceUpdateResponse.data.message}`);
+        }
       } else {
-        alert(`Balance update failed: ${balanceUpdateResponse.data.message}`);
-      }
-      } else {
+        console.error("Purchase error:", response.data.message);
         alert(`Purchase failed: ${response.data.message}`);
       }
     } catch (error) {
       console.error("Error:", error);
       alert("An error occurred while processing your request.");
     }
-  };
+  };  
 
   return (
     <div className="pt-16">

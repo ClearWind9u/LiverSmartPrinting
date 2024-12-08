@@ -10,7 +10,7 @@ const balanceSchema = new Schema({
   },
   price: {
       type: Number,
-      required: true,
+      required: false,
   },
   balance: {
       type: Number,
@@ -40,6 +40,10 @@ const UserSchema = new Schema({
     type: String,
     enum: ['user', 'admin'],
     default: 'user',
+  },
+  wallet: {
+    type: Number,
+    default: 0,
   },
   balancePage: {
       type: [balanceSchema],

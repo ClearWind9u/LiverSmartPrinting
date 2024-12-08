@@ -27,8 +27,8 @@ const printInfoSchema = new Schema({
         default: 1,
     },
     size: {
-        type: String, // Kích thước giấy in: A4, A3, Letter, v.v.
-        enum: ['A4', 'A3', 'Letter', 'Legal'],
+        type: String, // Kích thước giấy in
+        enum: ['A5', 'A4', 'A3', 'A2', 'A1', 'A0'],
         default: 'A4',
     },
     pageRange: {
