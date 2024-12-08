@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../redux/userSlice";
+import { Link } from "react-router-dom"; // Import Link
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -96,7 +97,13 @@ const LoginForm = () => {
             </button>
           </form>
 
-
+          {/* Sign Up Link */}
+          <div className="mt-4 text-center text-sm text-gray-600">
+            Don't have an account?{" "}
+            <Link to="/signup" className="text-blue-600 hover:underline">
+              Sign up for free
+            </Link>
+          </div>
         </div>
       </div>
     </div>

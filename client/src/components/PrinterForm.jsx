@@ -17,7 +17,7 @@ const PrinterForm = () => {
   const [pageRange, setPageRange] = useState("All");
   const [printSides, setPrintSides] = useState("one");
   const [remainingPaper, setRemainingPaper] = useState(100); // Example remaining paper
-  const user = useSelector((state) => state.auth.login?.currentUser); 
+  const user = useSelector((state) => state.auth.login?.currentUser);
 
   useEffect(() => {
     const fetchPrinter = async () => {
@@ -126,7 +126,7 @@ const PrinterForm = () => {
             <div className="border border-gray-400 rounded overflow-hidden">
               <iframe
                 src={filePreviewUrl}
-                className="w-full"
+                className="w-full h-full"
                 style={{ height: '590px' }}
                 title="File Preview"
               ></iframe>
@@ -285,8 +285,8 @@ const PrinterForm = () => {
           Cancel
         </Link>
         <button type="submit" className={`px-4 py-2 rounded ${filePreviewUrl
-            ? "bg-blue-500 text-white"
-            : "bg-gray-600 text-white cursor-not-allowed"
+          ? "bg-blue-500 text-white"
+          : "bg-gray-600 text-white cursor-not-allowed"
           }`} disabled={!filePreviewUrl}>
           Print
         </button>
