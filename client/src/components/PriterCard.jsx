@@ -42,7 +42,6 @@ const PrinterCard = ({ printer, userRole }) => {
             Information
           </button>
         </div>}
-      
       {isInfoModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-6 rounded-lg w-[400px] shadow-lg">
@@ -76,13 +75,13 @@ const PrinterCard = ({ printer, userRole }) => {
                       onChange={handleToggle}
                     />
                     <div className={`block w-14 h-8 rounded-full ${isEnabled
-                        ? "bg-green-500"
-                        : "bg-gray-600"
+                      ? "bg-green-500"
+                      : "bg-gray-600"
                       }`}></div>
                     <div
                       className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${isEnabled
-                          ? "transform translate-x-full bg-green-500"
-                          : ""
+                        ? "transform translate-x-full bg-green-500"
+                        : ""
                         }`}
                     ></div>
                   </div>

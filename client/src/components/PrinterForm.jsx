@@ -15,8 +15,7 @@ const PrinterForm = () => {
   const [pageSize, setPageSize] = useState("A4");
   const [pageRange, setPageRange] = useState("all");
   const [printSides, setPrintSides] = useState("one");
-  const [balancePage, setBalancePage] = useState(0);
-  const navigate = useNavigate();
+  const [remainingPaper, setRemainingPaper] = useState(100); // Example remaining paper
   const user = useSelector((state) => state.auth.login?.currentUser);
 
   useEffect(() => {
@@ -41,7 +40,7 @@ const PrinterForm = () => {
       try {
         // Gọi API lấy số dư
         const response = await axios.get(`http://localhost:5000/balance/${pageSize}/${user._id}`);
-        
+
         if (response.data.success) {
           setBalancePage(response.data.data.balance || 0);
         } else {
@@ -56,37 +55,37 @@ const PrinterForm = () => {
       fetchBalance();
     }
   }, [pageSize, user]);
-  
+
   const handlePrint = async (e) => {
     e.preventDefault();
-  
+
     if (!file) {
       alert("No file selected. Please upload a file before printing.");
       return;
     }
-  
+
     if (copies <= 0) {
       alert("Number of copies must be greater than 0.");
       return;
     }
-  
+
     if (balancePage < copies) {
       alert(`Insufficient balance for ${pageSize} paper. Please add more pages.`);
       return;
     }
-  
+
     try {
       // Gửi yêu cầu trừ số dư trang
       const updateBalanceResponse = await axios.put(`http://localhost:5000/update-balance/${user._id}`, {
         pageSize,
         changePage: -copies, // Số trang cần trừ
       });
-  
+
       if (!updateBalanceResponse.data.success) {
         alert("Failed to update page balance. Please try again.");
         return;
       }
-  
+
       // Tạo dữ liệu in
       const printData = {
         fileName: file.name,
@@ -99,11 +98,11 @@ const PrinterForm = () => {
         userId: user._id,
         printerId: id,
       };
-  
+
       const response = await axios.post("http://localhost:5000/histories/create", printData, {
         headers: { "Content-Type": "application/json" },
       });
-  
+
       if (response.data.success) {
         alert("Print job created successfully!");
         navigate("/printers");
@@ -114,7 +113,7 @@ const PrinterForm = () => {
       console.error("Error during print:", error);
       alert("An error occurred while processing the print job.");
     }
-  };  
+  };
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -156,7 +155,7 @@ const PrinterForm = () => {
             <div className="border border-gray-400 rounded overflow-hidden">
               <iframe
                 src={filePreviewUrl}
-                className="w-full"
+                className="w-full h-full"
                 style={{ height: '590px' }}
                 title="File Preview"
               ></iframe>
@@ -315,8 +314,7 @@ const PrinterForm = () => {
         <button type="submit" className={`px-4 py-2 rounded ${filePreviewUrl
           ? "bg-blue-500 text-white"
           : "bg-gray-600 text-white cursor-not-allowed"
-          }`} disabled={!filePreviewUrl}
-          onClick={(e) => handlePrint(e)}>
+          }`} disabled={!filePreviewUrl}>
           Print
         </button>
       </div>
