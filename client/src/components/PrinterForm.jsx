@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 const PrinterForm = () => {
@@ -10,11 +10,11 @@ const PrinterForm = () => {
   const [file, setFile] = useState(null);
   const [filePreviewUrl, setFilePreviewUrl] = useState(null);
   const [copies, setCopies] = useState(1);
-  const [colorMode, setColorMode] = useState("As a printer");
-  const [pageOrientation, setPageOrientation] = useState("As in document");
+  const [colorMode, setColorMode] = useState("as-a-printer");
+  const [pageOrientation, setPageOrientation] = useState("as-in-document");
   const [pagesPerSheet, setPagesPerSheet] = useState(1);
   const [pageSize, setPageSize] = useState("A4");
-  const [pageRange, setPageRange] = useState("All");
+  const [pageRange, setPageRange] = useState("all");
   const [printSides, setPrintSides] = useState("one");
   const [remainingPaper, setRemainingPaper] = useState(100); // Example remaining paper
   const user = useSelector((state) => state.auth.login?.currentUser);
@@ -36,46 +36,77 @@ const PrinterForm = () => {
     fetchPrinter();
   }, []);
 
+  useEffect(() => {
+    const fetchBalance = async () => {
+      try {
+        // Gọi API lấy số dư
+        const response = await axios.get(`http://localhost:5000/balance/${pageSize}/${user._id}`);
+
+        if (response.data.success) {
+          setBalancePage(response.data.data.balance || 0);
+        } else {
+          setBalancePage(0); // Nếu không tìm thấy loại giấy, đặt số dư về 0
+        }
+      } catch (error) {
+        console.error("Error fetching balance:", error);
+        setBalancePage(-1); // Trường hợp lỗi
+      }
+    };
+    if (user?._id) {
+      fetchBalance();
+    }
+  }, [pageSize, user]);
+
   const handlePrint = async (e) => {
     e.preventDefault();
 
+    if (!file) {
+      alert("No file selected. Please upload a file before printing.");
+      return;
+    }
+
+    if (copies <= 0) {
+      alert("Number of copies must be greater than 0.");
+      return;
+    }
+
+    if (balancePage < copies) {
+      alert(`Insufficient balance for ${pageSize} paper. Please add more pages.`);
+      return;
+    }
+
     try {
-      // Giả sử bạn có userId (lấy từ session hoặc state)
-      const userId = user._id; // Thay thế bằng userId thật
-
-      const formData = new FormData();
-      formData.append("file", file);
-
-      // Gửi file để lấy URL trên server
-      const uploadResponse = await axios.post("http://localhost:5000/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      // Gửi yêu cầu trừ số dư trang
+      const updateBalanceResponse = await axios.put(`http://localhost:5000/update-balance/${user._id}`, {
+        pageSize,
+        changePage: -copies, // Số trang cần trừ
       });
 
-      const fileUrl = uploadResponse.data.fileUrl;
+      if (!updateBalanceResponse.data.success) {
+        alert("Failed to update page balance. Please try again.");
+        return;
+      }
 
-      // Tạo dữ liệu lịch sử in
+      // Tạo dữ liệu in
       const printData = {
-        fileUrl,
+        fileName: file.name,
         noCopy: copies,
+        colorMode: colorMode,
         orientation: pageOrientation,
         multiplePage: pagesPerSheet,
         size: pageSize,
         pageRange,
-        userId,
+        userId: user._id,
         printerId: id,
       };
 
-      // Gửi yêu cầu tạo lịch sử in
       const response = await axios.post("http://localhost:5000/histories/create", printData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       });
 
       if (response.data.success) {
         alert("Print job created successfully!");
+        navigate("/printers");
       } else {
         alert("Failed to create print job.");
       }
@@ -89,8 +120,7 @@ const PrinterForm = () => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
-      const previewUrl = URL.createObjectURL(selectedFile);
-      setFilePreviewUrl(previewUrl); // Tạo URL xem trước file
+      setFilePreviewUrl(URL.createObjectURL(selectedFile)); // Tạo URL xem trước file
     }
   };
 
@@ -136,146 +166,144 @@ const PrinterForm = () => {
           {/* Settings */}
           <div>
             <div className="grid grid-cols-1 gap-4">
-              <div className="mb-3">
+              <div className="mb-2">
                 <label className="block font-medium mb-1">Number of copies:</label>
                 <input
                   type="number"
                   value={copies}
                   onChange={(e) => setCopies(e.target.value)}
                   className="border rounded w-full p-2"
+                  min="1"
                 />
               </div>
 
-              <div className="mb-3">
+              <div className="mb-2">
                 <label className="block font-medium mb-1">Color mode:</label>
                 <select
                   value={colorMode}
                   onChange={(e) => setColorMode(e.target.value)}
-                  className="border rounded w-full p-2"
-                >
-                  <option>As a printer</option>
-                  <option>Black & White</option>
-                  <option>Color</option>
+                  className="border rounded w-full p-2">
+                  <option value="as-a-printer">As a printer</option>
+                  <option value="black-white">Black & White</option>
+                  <option value="color">Color</option>
                 </select>
               </div>
 
-              <div className="mb-3">
+              <div className="mb-2">
                 <label className="block font-medium mb-1">Page orientation:</label>
                 <select
                   value={pageOrientation}
                   onChange={(e) => setPageOrientation(e.target.value)}
                   className="border rounded w-full p-2"
                 >
-                  <option>As in document</option>
-                  <option>Portrait</option>
-                  <option>Landscape</option>
+                  <option value="as-in-document">As in document</option>
+                  <option value="portrait">Portrait</option>
+                  <option value="landscape">Landscape</option>
                 </select>
               </div>
 
-              <div className="mb-3">
+              <div className="mb-2">
                 <label className="block font-medium mb-1">Multiple pages per sheet:</label>
                 <select
                   value={pagesPerSheet}
                   onChange={(e) => setPagesPerSheet(e.target.value)}
                   className="border rounded w-full p-2"
                 >
-                  <option>1 page</option>
-                  <option>2 pages</option>
-                  <option>4 pages</option>
+                  <option value="1">1 page</option>
+                  <option value="2">2 pages</option>
+                  <option value="4">4 pages</option>
                 </select>
               </div>
 
-              <div className="mb-3">
+              <div className="mb-2">
                 <label className="block font-medium mb-1">Page size:</label>
                 <select
                   value={pageSize}
                   onChange={(e) => setPageSize(e.target.value)}
                   className="border rounded w-full p-2"
                 >
-                  <option>A4</option>
+                  <option>A0</option>
+                  <option>A1</option>
+                  <option>A2</option>
                   <option>A3</option>
-                  <option>Letter</option>
-                  <option>Legal</option>
+                  <option>A4</option>
+                  <option>A5</option>
                 </select>
               </div>
 
-              {/* Page Range and Slides*/}
-              <div className="grid grid-cols-2 gap-1">
-                <div>
-                  <label className="block font-medium mb-3">Page range:</label>
-                  <div className="flex items-center">
-                    <label className="mr-2">
-                      <input
-                        type="radio"
-                        name="pageRange"
-                        value="All"
-                        checked={pageRange === "All"}
-                        onChange={() => setPageRange("All")}
-                        className="mr-1"
-                      />
-                      All
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name="pageRange"
-                        value="Pages"
-                        checked={pageRange === "Pages"}
-                        onChange={() => setPageRange("Pages")}
-                        className="mr-1"
-                      />
-                      Pages
-                    </label>
-                    {pageRange === "Pages" && (
-                      <input
-                        type="text"
-                        placeholder="e.g., 1-5"
-                        className="border rounded p-1 ml-2"
-                      />
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block font-medium mb-1">Sides:</label>
-                  <div className="flex items-center">
-                    <label className="mr-2">
-                      <input
-                        type="radio"
-                        name="printSides"
-                        value="one"
-                        checked={printSides === "one"}
-                        onChange={() => setPrintSides("one")}
-                        className="mr-1"
-                      />
-                      Print one sided
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name="printSides"
-                        value="both"
-                        checked={printSides === "both"}
-                        onChange={() => setPrintSides("both")}
-                        className="mr-1"
-                      />
-                      Print on both sides
-                    </label>
-                  </div>
+              <div className="mb-1">
+                <label className="block font-medium mb-1">Page range:</label>
+                <div className="flex items-center">
+                  <label className="mr-2">
+                    <input
+                      type="radio"
+                      name="pageRange"
+                      value="All"
+                      checked={pageRange === "all"}
+                      onChange={() => setPageRange("all")}
+                      className="mr-1"
+                    />
+                    All
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="pageRange"
+                      value="Pages"
+                      checked={pageRange !== "all"}
+                      onChange={() => setPageRange(null)}
+                      className="mr-1"
+                    />
+                    Pages
+                  </label>
+                  {pageRange !== "all" && (
+                    <input
+                      type="text"
+                      placeholder="e.g., 1-5"
+                      onChange={(e) => setPageRange(e.target.value)}
+                      className="border rounded ml-3"
+                    />
+                  )}
                 </div>
               </div>
 
-              <div className="mb-3 flex items-center">
-                <Link
-                  to="/buy-paper"
-                  className="px-4 py-2 bg-green-500 text-white rounded"
-                >
-                  Buy Paper
-                </Link>
-                <span className="ml-4">Remaining paper: {remainingPaper}</span>
+              <div className="mb-3">
+                <label className="block font-medium mb-1">Sides:</label>
+                <div className="flex items-center">
+                  <label className="mr-2">
+                    <input
+                      type="radio"
+                      name="printSides"
+                      value="one"
+                      checked={printSides === "one"}
+                      onChange={() => setPrintSides("one")}
+                      className="mr-1"
+                    />
+                    Print one sided
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="printSides"
+                      value="both"
+                      checked={printSides === "both"}
+                      onChange={() => setPrintSides("both")}
+                      className="mr-1"
+                    />
+                    Print on both sides
+                  </label>
+                </div>
               </div>
             </div>
 
+            <div className="mb-2 flex items-center">
+              <Link
+                to="/buy-paper"
+                className="px-4 py-2 bg-green-500 text-white rounded">
+                Buy Pages
+              </Link>
+              <span className="ml-4">Balance Pages: {balancePage}</span>
+            </div>
           </div>
         </div>
       )}

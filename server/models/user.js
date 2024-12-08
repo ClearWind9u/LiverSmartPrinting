@@ -2,7 +2,27 @@ import mongoose from "mongoose";
 
 const Schema = mongoose.Schema;
 
+const balanceSchema = new Schema({
+  type: {
+      type: String,
+      enum: ['A0', 'A1', 'A2', 'A3', 'A4', 'A5'],
+      required: true,
+  },
+  price: {
+      type: Number,
+      required: false,
+  },
+  balance: {
+      type: Number,
+      default: 0,
+  }
+});
+
 const UserSchema = new Schema({
+  username: {
+    type: String,
+    required: true,
+  },
   email: {
     type: String,
     required: true,
@@ -19,7 +39,15 @@ const UserSchema = new Schema({
   role: {
     type: String,
     enum: ['user', 'admin'],
-    default: 'user', // Đặt giá trị mặc định là 'user'
+    default: 'user',
+  },
+  wallet: {
+    type: Number,
+    default: 0,
+  },
+  balancePage: {
+      type: [balanceSchema],
+      default: [],
   },
   createdAt: {
     type: Date,
@@ -28,6 +56,5 @@ const UserSchema = new Schema({
 });
 
 const User = mongoose.model('users', UserSchema);
-
 
 export default User;

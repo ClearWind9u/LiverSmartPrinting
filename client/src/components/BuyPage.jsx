@@ -1,33 +1,84 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useSelector } from "react-redux";
 
 const BuyPage = () => {
   const [paperType, setPaperType] = useState("A4");
   const [quantity, setQuantity] = useState(1);
-  const [price, setPrice] = useState(0.1); // Example price per sheet
+  const [price, setPrice] = useState(100); // Example price per sheet
   const navigate = useNavigate();
+  const user = useSelector((state) => state.auth.login?.currentUser);
 
   const handlePaperTypeChange = (e) => {
     const selectedType = e.target.value;
     setPaperType(selectedType);
     // Update price based on selected paper type
     const prices = {
-      A1: 1.0,
-      A2: 0.8,
-      A3: 0.5,
-      A4: 0.1,
-      A5: 0.05,
+      A1: 1000,
+      A2: 500,
+      A3: 250,
+      A4: 100,
+      A5: 50,
     };
     setPrice(prices[selectedType]);
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    // Kiểm tra đầu vào
+    if (!paperType) {
+      alert("Please select a paper type.");
+      return;
+    }
+  
+    if (!quantity || quantity <= 0) {
+      alert("Quantity must be greater than 0.");
+      return;
+    }
+  
+    const totalPrice = price * quantity;
+  
+    try {
+      // Gửi yêu cầu POST để tạo giao dịch mua
+      const response = await axios.post("http://localhost:5000/pages/create", {
+        type: paperType,
+        quantity,
+        totalPrice,
+        userId: user._id,
+      });
+  
+      if (response.data.success) {
+        // Gửi yêu cầu PUT để cập nhật balancePage
+        const balanceUpdateResponse = await axios.put(`http://localhost:5000/update-balance/${user._id}`, {
+          pageSize: paperType, // Thêm loại giấy
+          changePage: Number(quantity), // Thêm số lượng trang
+        });
+  
+        if (balanceUpdateResponse.data.success) {
+          alert("Purchase successful! Balance updated.");
+        } else {
+          console.error("Balance update error:", balanceUpdateResponse.data.message);
+          alert(`Purchase successful, but balance update failed: ${balanceUpdateResponse.data.message}`);
+        }
+      } else {
+        console.error("Purchase error:", response.data.message);
+        alert(`Purchase failed: ${response.data.message}`);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("An error occurred while processing your request.");
+    }
+  };  
+
   return (
     <div className="pt-16">
-      <form className="bg-gray-200 p-8 rounded shadow-lg w-3/4 h-5/6 mx-auto mt-6">
-        <h2 className="text-lg font-semibold mb-4 text-center">Buy Paper</h2>
+      <form className="bg-gray-200 p-8 rounded shadow-lg w-3/4 h-5/6 mx-auto mt-6" onSubmit={handleSubmit}>
+        <h2 className="text-lg font-semibold mb-4 text-center">Buy Pages</h2>
 
         <div className="mb-4">
-          <label className="block font-medium mb-1">Paper type:</label>
+          <label className="block font-medium mb-1">Page type:</label>
           <select
             value={paperType}
             onChange={handlePaperTypeChange}
@@ -46,26 +97,27 @@ const BuyPage = () => {
           <input
             type="number"
             value={quantity}
+            min="1"
             onChange={(e) => setQuantity(e.target.value)}
             className="border rounded w-full p-2"
           />
         </div>
 
         <div className="mb-4">
-          <label className="block font-medium mb-1">Price per sheet:</label>
+          <label className="block font-medium mb-1">Price per sheet (VNĐ):</label>
           <input
-            type="text"
-            value={`$${price}`}
+            type="number"
+            value={`${price}`}
             readOnly
             className="border rounded w-full p-2 bg-gray-100"
           />
         </div>
 
         <div className="mb-4">
-          <label className="block font-medium mb-1">Total price:</label>
+          <label className="block font-medium mb-1">Total price (VNĐ):</label>
           <input
-            type="text"
-            value={`$${(price * quantity).toFixed(2)}`}
+            type="number"
+            value={`${(price * quantity)}`}
             readOnly
             className="border rounded w-full p-2 bg-gray-100"
           />
@@ -75,14 +127,12 @@ const BuyPage = () => {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="px-4 py-2 bg-gray-300 rounded"
-          >
+            className="px-4 py-2 bg-gray-300 rounded">
             Cancel
           </button>
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded"
-          >
+            className="px-4 py-2 bg-blue-500 text-white rounded">
             Buy
           </button>
         </div>

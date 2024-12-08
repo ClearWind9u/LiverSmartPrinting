@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-//View printer with id
+//View printer by printerId
 router.get('/:id', async (req, res) => {
     const id = req.params.id;
     try {
@@ -51,7 +51,7 @@ router.put('/:id', async (req, res) => {
         //User not authorised to update printer
         if (!updatedPrinter)
             return res.status(401).json({ success: false, message: 'Printer not found or user not authorise' })
-        res.json({ success: true, message: 'Excellent progress!', updatedPrinter });
+        res.json({ success: true, message: 'Update successfull!', updatedPrinter });
     } catch (error) {
         console.log(error);
         res.status(500).json({ success: false, message: 'Internal server error' })

@@ -1,14 +1,42 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const PrintingLog = () => {
-  const printingLog = [
-    { id: 1, fileName: "Document1.pdf", copies: 2, date: "2023-10-01" },
-    { id: 2, fileName: "Document2.pdf", copies: 1, date: "2023-10-02" },
-    { id: 3, fileName: "Document3.pdf", copies: 3, date: "2023-10-03" },
-    { id: 4, fileName: "Document4.pdf", copies: 4, date: "2023-10-04" },
-    { id: 5, fileName: "Document5.pdf", copies: 5, date: "2023-10-05" },
-    // Add more printing log entries here
-  ];
+  const [printingLog, setPrintingLog] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchPrintingLogs = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/histories");
+        if (response.data.success) {
+          // Duyệt qua từng lịch sử in và ánh xạ dữ liệu cần thiết
+          const logs = response.data.histories.flatMap((history) =>
+            history.printInfo.map((info, index) => ({
+              id: `${history._id}`,
+              fileName: info.fileName,
+              copies: info.noCopy,
+              date: new Date(info.time).toLocaleDateString(), // Định dạng ngày tháng
+            }))
+          );
+          setPrintingLog(logs);
+        } else {
+          setError("Failed to fetch printing logs");
+        }
+      } catch (err) {
+        console.error(err);
+        setError("An error occurred while fetching printing logs");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPrintingLogs();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
 
   return (
     <div>

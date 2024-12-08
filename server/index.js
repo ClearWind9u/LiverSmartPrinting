@@ -2,12 +2,16 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+
 
 dotenv.config();
 
-import authRouter from "./routes/auth.js";
-import printerRouter from "./routes/printer.js"
-import historyRouter from "./routes/history.js"
+import userRouter from "./routes/user.js";
+import printerRouter from "./routes/printer.js";
+import historyRouter from "./routes/history.js";
+import buyPageRouter from "./routes/buypage.js";
+import balancePageRouter from "./routes/balance.js";
 
 const app = express();
 app.use(cors());
@@ -30,9 +34,14 @@ const connectDB = async () => {
 
 connectDB();
 
-app.use('/', authRouter);
+app.use('/', userRouter);
 app.use('/printers', printerRouter);
 app.use('/histories', historyRouter);
+app.use('/pages', buyPageRouter);
+app.use('/balance', balancePageRouter);
+
+// Phục vụ các file tĩnh trong thư mục 'uploads'
+// app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 const PORT = 5000;
 

@@ -121,7 +121,7 @@ const Header = ({ role }) => {
               onClick={() => setModalOpen(true)}
               className="flex items-center px-1 py-1 rounded-full text-white hover:text-gray-700"
             >
-              <span className="mr-2">+ 100₫</span>
+              <span className="mr-2">+ 100 VNĐ</span>
             </button>
 
             {/* Profile Button */}
