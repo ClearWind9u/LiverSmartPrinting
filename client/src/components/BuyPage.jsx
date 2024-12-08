@@ -1,45 +1,66 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { loginSuccess } from "../redux/userSlice";
 
 const BuyPage = () => {
   const [paperType, setPaperType] = useState("A4");
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(100); // Example price per sheet
   const navigate = useNavigate();
+  const [pagePrice, setPagePrice] = useState([]);
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.login?.currentUser);
+
+  useEffect(() => {
+    const fetchPagePrice = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/balance");
+        if (response.data.success) {
+          // Ánh xạ dữ liệu từ API
+          const pages = response.data.balancePages.map((page) => ({
+            id: `${page._id}`, // Tạo ID duy nhất
+            type: page.type,
+            price: page.price,
+          }));
+          setPagePrice(pages);
+        } else {
+          setError("Failed to fetch payment logs");
+        }
+      } catch (err) {
+        console.error(err);
+        setError("An error occurred while fetching payment logs");
+      }
+    };
+
+    fetchPagePrice();
+  }, []);
 
   const handlePaperTypeChange = (e) => {
     const selectedType = e.target.value;
     setPaperType(selectedType);
-    // Update price based on selected paper type
-    const prices = {
-      A1: 1000,
-      A2: 500,
-      A3: 250,
-      A4: 100,
-      A5: 50,
-    };
-    setPrice(prices[selectedType]);
+    const page = pagePrice.find(page => page.type === selectedType);
+    const price = page.price;
+    setPrice(price);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
     // Kiểm tra đầu vào
     if (!paperType) {
       alert("Please select a paper type.");
       return;
     }
-  
     if (!quantity || quantity <= 0) {
       alert("Quantity must be greater than 0.");
       return;
     }
-  
     const totalPrice = price * quantity;
-  
+    if (user.wallet < totalPrice) {
+      alert('No');
+      return;
+    }
     try {
       // Gửi yêu cầu POST để tạo giao dịch mua
       const response = await axios.post("http://localhost:5000/pages/create", {
@@ -48,16 +69,24 @@ const BuyPage = () => {
         totalPrice,
         userId: user._id,
       });
-  
+
       if (response.data.success) {
         // Gửi yêu cầu PUT để cập nhật balancePage
         const balanceUpdateResponse = await axios.put(`http://localhost:5000/update-balance/${user._id}`, {
           pageSize: paperType, // Thêm loại giấy
           changePage: Number(quantity), // Thêm số lượng trang
         });
-  
-        if (balanceUpdateResponse.data.success) {
+        const walletUpdateResponse = await axios.put(`http://localhost:5000/update-wallet/${user._id}`, { changeWallet: Number(totalPrice) * -1});
+        if (balanceUpdateResponse.data.success && walletUpdateResponse.data.success) {
+          const updateUser = {
+            ...user,
+            wallet: user.wallet - Number(totalPrice)
+          }
+          dispatch(loginSuccess(updateUser));
           alert("Purchase successful! Balance updated.");
+        } else if (!walletUpdateResponse.data.success) {
+          console.error("Wallet update error:", walletUpdateResponse.data.message);
+          alert(`Purchase successful, but wallet update failed: ${walletUpdateResponse.data.message}`);
         } else {
           console.error("Balance update error:", balanceUpdateResponse.data.message);
           alert(`Purchase successful, but balance update failed: ${balanceUpdateResponse.data.message}`);
@@ -70,7 +99,7 @@ const BuyPage = () => {
       console.error("Error:", error);
       alert("An error occurred while processing your request.");
     }
-  };  
+  };
 
   return (
     <div className="pt-16">
@@ -82,13 +111,15 @@ const BuyPage = () => {
           <select
             value={paperType}
             onChange={handlePaperTypeChange}
-            className="border rounded w-full p-2"
-          >
-            <option>A1</option>
-            <option>A2</option>
-            <option>A3</option>
-            <option>A4</option>
-            <option>A5</option>
+            className="border rounded w-full p-2">
+            {pagePrice
+              .slice() // Tạo bản sao mảng để tránh thay đổi mảng gốc
+              .sort((a, b) => a.type.localeCompare(b.type)) // Sắp xếp theo tên
+              .map((page) => (
+                <option key={page.id} value={page.type}>
+                  {page.type}
+                </option>
+              ))}
           </select>
         </div>
 

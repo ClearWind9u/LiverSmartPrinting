@@ -81,7 +81,6 @@ router.post('/login', async (req, res) => {
 // Xem thông tin chi tiết của người dùng
 router.get('/user/:userId', async (req, res) => {
   const { userId } = req.params;
-
   try {
     // Tìm người dùng theo userId
     const user = await User.findById(userId).select('-password'); // Không trả về trường password
@@ -280,7 +279,6 @@ router.put('/update-balance/:userId', async (req, res) => {
 router.put('/update-wallet/:userId', async (req, res) => {
   const { changeWallet } = req.body;
   const userId = req.params.userId;
-
   // Kiểm tra dữ liệu đầu vào
   if (!userId || changeWallet === undefined) {
     return res.status(400).json({
@@ -300,7 +298,7 @@ router.put('/update-wallet/:userId', async (req, res) => {
     }
 
     // Kiểm tra và cập nhật wallet
-    if (changeWallet < 0 && user.wallet + changeWallet < 0) {
+    if (user.wallet + changeWallet < 0) {
       return res.status(400).json({
         success: false,
         message: `Insufficient wallet balance`,
@@ -308,9 +306,9 @@ router.put('/update-wallet/:userId', async (req, res) => {
     }
 
     user.wallet += changeWallet;
-
     // Lưu cập nhật vào cơ sở dữ liệu
     await user.save();
+    console.log("User database: ", user);
 
     res.json({
       success: true,

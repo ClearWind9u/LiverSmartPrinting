@@ -1,28 +1,75 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 const AddPrinterForm = () => {
   const [printerName, setPrinterName] = useState("");
-  const [manufacturer, setManufacturer] = useState("");
-  const [yearOfManufacture, setYearOfManufacture] = useState("");
-  const [placeOfManufacture, setPlaceOfManufacture] = useState("");
-  const [location, setLocation] = useState("");
-  const [specifications, setSpecifications] = useState("");
+  const [type, setType] = useState("");
+  const [price, setPrice] = useState("");
+  const [information, setInformation] = useState("");
   const [file, setFile] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle form submission logic
-    const printerData = {
-      printerName,
-      manufacturer,
-      yearOfManufacture,
-      placeOfManufacture,
-      location,
-      specifications,
-      file,
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const fileType = file.type;
+      if (fileType === "image/jpeg" || fileType === "image/png") {
+        setError(""); // Xóa lỗi nếu có
+        const imageUrl = URL.createObjectURL(file);
+        setSelectedImage(imageUrl);
+        setFile(file); // Lưu file vào state
+      } else {
+        setError("Please upload a valid JPG or PNG file.");
+        setSelectedImage(null);
+      }
+    }
+  };  
+
+  useEffect(() => {
+    // Dọn dẹp URL khi thành phần bị hủy
+    return () => {
+      if (selectedImage) {
+        URL.revokeObjectURL(selectedImage);
+      }
     };
-    console.log("Printer added:", printerData);
+  }, [selectedImage]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    // Validate form data
+    if (!printerName || !information || !type || !price || !file) {
+      setError("All fields are required");
+      return;
+    }
+    try {
+      const response = await axios.post("http://localhost:5000/printers/create", {
+        name: printerName, price: price, type: type, information: information, image: `../public/${file.name}`},
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+  
+      if (response.data.success) {
+        alert("Printer added successfully!");
+        // Clear form
+        setPrinterName("");
+        setType("");
+        setPrice("");
+        setInformation("");
+        setFile(null);
+        setSelectedImage(null);
+        setError("");
+      } else {
+        setError(response.data.message || "Failed to add printer");
+      }
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Something went wrong. Please try again later.");
+    }
   };
 
   return (
@@ -42,63 +89,51 @@ const AddPrinterForm = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block font-medium mb-1">Manufacturer:</label>
+          <label className="block font-medium mb-1">Type:</label>
           <input
             type="text"
-            value={manufacturer}
-            onChange={(e) => setManufacturer(e.target.value)}
+            value={type}
+            onChange={(e) => setType(e.target.value)}
             className="border rounded w-full p-2"
           />
         </div>
         <div className="mb-4">
-          <label className="block font-medium mb-1">Year of manufacture:</label>
+          <label className="block font-medium mb-1">Price:</label>
           <input
             type="text"
-            value={yearOfManufacture}
-            onChange={(e) => setYearOfManufacture(e.target.value)}
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
             className="border rounded w-full p-2"
           />
         </div>
-        <div className="mb-4">
-          <label className="block font-medium mb-1">
-            Place of manufacture:
-          </label>
-          <input
-            type="text"
-            value={placeOfManufacture}
-            onChange={(e) => setPlaceOfManufacture(e.target.value)}
-            className="border rounded w-full p-2"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block font-medium mb-1">Location:</label>
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            className="border rounded w-full p-2"
-          />
-        </div>
-        <div className="mb-4 col-span-2">
-          <label className="block font-medium mb-1">Specifications:</label>
+        <div className="mb-4 col-grid-2">
+          <label className="block font-medium mb-1">Information:</label>
           <textarea
-            value={specifications}
-            onChange={(e) => setSpecifications(e.target.value)}
+            value={information}
+            onChange={(e) => setInformation(e.target.value)}
             className="border rounded w-full p-2"
           ></textarea>
         </div>
+        {/* Picture */}
         <div className="mb-4 col-span-2">
           <label className="block font-medium mb-2">Picture of Printer:</label>
           <div className="border border-dashed border-gray-400 rounded flex justify-center items-center p-4">
             <input
               type="file"
-              onChange={(e) => setFile(e.target.files[0])}
-              className="hidden"
-              id="fileInput"
-            />
-            <label htmlFor="fileInput" className="cursor-pointer text-blue-500">
-              Select file or <span className="underline">Drag file here</span>
-            </label>
+              accept=".jpg,.jpeg,.png"
+              onChange={handleImageChange}
+              className="cursor-pointer text-black" />
+            {error && <p className="text-red-500">{error}</p>}
+            {selectedImage && (
+              <div>
+                <p className="text-blue-500">Image preview:</p>
+                <img
+                  src={selectedImage}
+                  alt="Preview"
+                  style={{ width: "auto", height: "240px" }}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

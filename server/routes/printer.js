@@ -1,5 +1,7 @@
 import express from "express";
 import Printer from "../models/printer.js";
+import multer from "multer";
+import path from "path";
 
 const router = express.Router();
 
@@ -26,13 +28,14 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-//Create a printer
+//Add a printer
 router.post('/create', async (req, res) => {
-    const { name, price, type, image, information } = req.body
-    if (!name)
-        return res.status(400).json({ success: false, message: 'Name is required' })
+    const { name, price, type, image, information } = req.body;
+    if (!name || !price || !type || !information) {
+        return res.status(400).json({ success: false, message: "All fields are required" });
+    }
     try {
-        const newPrinter = new Printer({ name, price, type, image, information })
+        const newPrinter = new Printer({ name, price, type, image, status : "Enable", information })
         await newPrinter.save()
         res.status(200).json({ success: true, message: 'Create success', printer: newPrinter })
     } catch (error) {

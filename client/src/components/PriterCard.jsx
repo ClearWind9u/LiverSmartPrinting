@@ -19,20 +19,30 @@ const PrinterCard = ({ printer, userRole }) => {
         alt=""
         className="w-[300px] h-[200px] object-cover"
       />
-      <div className="flex justify-between items-center w-5/6 pt-4">
-        <Link
-          to={`/printer/${printer._id}`}
-          className="bg-[#f05258] text-white px-4 py-1 rounded-full w-[120px]"
-        >
-          Select
-        </Link>
-        <button
-          className="bg-[#1f89db] text-white px-4 py-1 rounded-full w-[120px]"
-          onClick={handleInfoModalOpen}
-        >
-          Information
-        </button>
-      </div>
+      {userRole === 'user' &&
+        <div className="flex justify-between items-center w-5/6 pt-4">
+          <Link
+            to={`/printer/${printer._id}`}
+            className="bg-[#f05258] text-white px-4 py-1 rounded-full w-[120px]"
+          >
+            Select
+          </Link>
+          <button
+            className="bg-[#1f89db] text-white px-4 py-1 rounded-full w-[120px]"
+            onClick={handleInfoModalOpen}
+          >
+            Information
+          </button>
+        </div>}
+      {userRole === 'admin' && 
+        <div className="flex justify-between items-center pt-4">
+          <button
+            className="bg-[#1f89db] text-white px-4 py-1 rounded-full w-[120px]"
+            onClick={handleInfoModalOpen}>
+            Information
+          </button>
+        </div>}
+      
       {isInfoModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-6 rounded-lg w-[400px] shadow-lg">

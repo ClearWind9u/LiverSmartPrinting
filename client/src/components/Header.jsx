@@ -1,8 +1,9 @@
 import * as React from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { loginSuccess } from "../redux/userSlice";
+import axios from "axios";
 
 import Logo from "../../assets/Logo.png";
 import HomeIcon from "@mui/icons-material/Home";
@@ -14,10 +15,12 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 
 const Header = ({ role }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  //const [userWallet, setUserWallet] = useState(0);
   const [modalOpen, setModalOpen] = useState(false); // State để mở modal nạp tiền
   const [step, setStep] = useState(1); // Bước 1: Nhập số tiền, Bước 2: Hiển thị mã QR
   const [amount, setAmount] = useState(""); // Số tiền người dùng nhập
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.login?.currentUser);
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
@@ -36,16 +39,32 @@ const Header = ({ role }) => {
   };
 
   // Hàm định dạng số tiền
-  const formatAmount = (value) => {
-    // Loại bỏ các ký tự không phải số
-    const numericValue = value.replace(/\D/g, "");
-    // Thêm dấu chấm sau mỗi 3 chữ số
-    return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  };
+  // const formatAmount = (value) => {
+  //   // Loại bỏ các ký tự không phải số
+  //   const numericValue = value.replace(/\D/g, "");
+  //   // Thêm dấu chấm sau mỗi 3 chữ số
+  //   return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  // };
 
   const handleAmountChange = (e) => {
-    setAmount(formatAmount(e.target.value));
+    setAmount(e.target.value);
   };
+
+  const handleAddBalance = async() => {
+    try {
+      const response = await axios.put(`http://localhost:5000/update-wallet/${user._id}`, {changeWallet : Number(amount)});
+      if (response.data.success) {
+        const updateUser = { 
+          ...user,
+          wallet : user.wallet + Number(amount)
+        }
+        dispatch(loginSuccess(updateUser));
+        alert(`Add ${amount} successfully!`);
+      }
+    } catch (error) {
+      console.error();
+    }
+  }
 
   const blue = "#1f89db";
   const red = "#f05258";
@@ -121,7 +140,7 @@ const Header = ({ role }) => {
               onClick={() => setModalOpen(true)}
               className="flex items-center px-1 py-1 rounded-full text-white hover:text-gray-700"
             >
-              <span className="mr-2">+ 100 VNĐ</span>
+              {user.role !== 'admin' && <span className="mr-2">+ {user.wallet} VNĐ</span>}
             </button>
 
             {/* Profile Button */}
@@ -167,9 +186,8 @@ const Header = ({ role }) => {
                   onChange={handleAmountChange} // Định dạng số tiền tại đây
                 />
                 <button
-                  onClick={handleNextStep}
-                  className="w-full bg-green-500 text-white py-2 rounded font-bold hover:bg-green-600"
-                >
+                  onClick={() => handleAddBalance()}
+                  className="w-full bg-green-500 text-white py-2 rounded font-bold hover:bg-green-600">
                   Confirm
                 </button>
               </div>

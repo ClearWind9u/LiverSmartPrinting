@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 const PrinterForm = () => {
   const { id } = useParams();

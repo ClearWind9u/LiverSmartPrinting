@@ -19,6 +19,11 @@ const PrinterSchema = new Schema ({
         type: String,
         required: true,
     },
+    status: {
+        type: String,
+        enum: ['Enable', 'Disable'],
+        default: 'Enable',
+    },
     information: {
         type: String,
         required: false,
