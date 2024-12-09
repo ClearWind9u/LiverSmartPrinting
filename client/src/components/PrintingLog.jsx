@@ -33,8 +33,6 @@ const PrintingLog = () => {
             })
           );
 
-          console.log(users);
-
           const printerId = response.data.histories.map(
             (history) => history.printerId
           );
