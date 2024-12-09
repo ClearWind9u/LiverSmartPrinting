@@ -15,7 +15,7 @@ const PrinterForm = () => {
   const [pageSize, setPageSize] = useState("A4");
   const [pageRange, setPageRange] = useState("all");
   const [printSides, setPrintSides] = useState("one");
-  const [remainingPaper, setRemainingPaper] = useState(100); // Example remaining paper
+  const [balancePage, setBalancePage] = useState(0);
   const user = useSelector((state) => state.auth.login?.currentUser);
 
   useEffect(() => {
