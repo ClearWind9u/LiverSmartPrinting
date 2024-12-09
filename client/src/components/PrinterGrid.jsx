@@ -11,7 +11,7 @@ const PrinterGrid = ({ role }) => {
   useEffect(() => {
     const fetchPrinters = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/printers', {  
+        const response = await axios.get("http://localhost:5000/printers", {
           headers: {
             "Content-Type": "application/json",
           },
@@ -26,12 +26,13 @@ const PrinterGrid = ({ role }) => {
   }, []);
 
   return (
-    <div className="w-full px-10 pt-20">
+    <div className="w-3/4 pt-20 mx-auto">
       {user.role === "admin" && (
         <div className="mb-4">
           <Link
             to="/add-printer"
-            className="bg-[#f05258] text-white px-4 py-2 rounded-full">
+            className="bg-[#f05258] text-white px-4 py-2 rounded-full"
+          >
             Add Printer
           </Link>
         </div>

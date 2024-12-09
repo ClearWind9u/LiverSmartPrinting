@@ -19,29 +19,32 @@ const PrinterCard = ({ printer, userRole }) => {
         alt=""
         className="w-[300px] h-[200px] object-cover"
       />
-      {userRole === 'user' &&
+      {userRole === "user" && (
         <div className="flex justify-between items-center w-5/6 pt-4">
           <Link
             to={`/printer/${printer._id}`}
-            className="bg-[#f05258] text-white px-4 py-1 rounded-full w-[120px]"
+            className="bg-[#f05258] text-white text-center px-4 py-1 rounded-full w-[120px]"
           >
             Select
           </Link>
+          <button
+            className="bg-[#1f89db] text-white text-center px-4 py-1 rounded-full w-[120px]"
+            onClick={handleInfoModalOpen}
+          >
+            Information
+          </button>
+        </div>
+      )}
+      {userRole === "admin" && (
+        <div className="flex justify-between items-center pt-4">
           <button
             className="bg-[#1f89db] text-white px-4 py-1 rounded-full w-[120px]"
             onClick={handleInfoModalOpen}
           >
             Information
           </button>
-        </div>}
-      {userRole === 'admin' && 
-        <div className="flex justify-between items-center pt-4">
-          <button
-            className="bg-[#1f89db] text-white px-4 py-1 rounded-full w-[120px]"
-            onClick={handleInfoModalOpen}>
-            Information
-          </button>
-        </div>}
+        </div>
+      )}
       {isInfoModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-6 rounded-lg w-[400px] shadow-lg">
@@ -52,9 +55,7 @@ const PrinterCard = ({ printer, userRole }) => {
               x
             </button>
             <h2 className="text-2xl font-bold mb-4">{printer.name}</h2>
-            <p className="mb-4">
-              {printer.information}
-            </p>
+            <p className="mb-4">{printer.information}</p>
             {userRole === "admin" && (
               <div className="flex justify-between items-center mt-4">
                 <button
@@ -74,15 +75,17 @@ const PrinterCard = ({ printer, userRole }) => {
                       checked={isEnabled}
                       onChange={handleToggle}
                     />
-                    <div className={`block w-14 h-8 rounded-full ${isEnabled
-                      ? "bg-green-500"
-                      : "bg-gray-600"
-                      }`}></div>
                     <div
-                      className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${isEnabled
-                        ? "transform translate-x-full bg-green-500"
-                        : ""
-                        }`}
+                      className={`block w-14 h-8 rounded-full ${
+                        isEnabled ? "bg-green-500" : "bg-gray-600"
+                      }`}
+                    ></div>
+                    <div
+                      className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${
+                        isEnabled
+                          ? "transform translate-x-full bg-green-500"
+                          : ""
+                      }`}
                     ></div>
                   </div>
                   <div className="ml-3 text-gray-600 font-medium">
