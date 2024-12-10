@@ -308,7 +308,6 @@ router.put('/update-wallet/:userId', async (req, res) => {
     user.wallet += changeWallet;
     // Lưu cập nhật vào cơ sở dữ liệu
     await user.save();
-    console.log("User database: ", user);
 
     res.json({
       success: true,
