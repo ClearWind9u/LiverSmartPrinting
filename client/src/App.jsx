@@ -13,7 +13,9 @@ function App({ role }) {
     <>
       <div className="w-full h-screen">
         <Header role={userRole} />
-        <main className={`h-[750px] bg-gradient-to-b ${bgColor}`}>
+        <main
+          className={`h-full bg-gradient-to-b ${bgColor} mt-[60px] mb-[200px]`}
+        >
           <Outlet />
         </main>
         <Footer role={userRole} />
