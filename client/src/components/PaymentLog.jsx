@@ -12,13 +12,36 @@ const PaymentLog = () => {
         const response = await axios.get("http://localhost:5000/pages");
         if (response.data.success) {
           // Ánh xạ dữ liệu từ API
-          const logs = response.data.buypages.map((log, index) => ({
+          const buyData = response.data.buypages.map((log, index) => ({
             id: `${log._id}`, // Tạo ID duy nhất
+            userId: log.userId,
             paperType: log.type,
             quantity: log.quantity,
             totalPrice: `${log.totalPrice} VNĐ`, // Định dạng giá
             date: new Date(log.time).toLocaleDateString(), // Định dạng ngày
           }));
+
+          const userId = buyData.map((log) => log.userId);
+
+          const users = await Promise.all(
+            userId.map(async (id) => {
+              const response = await axios.get(
+                "http://localhost:5000/user/" + id
+              );
+              return response.data;
+            })
+          );
+
+          const logs = buyData.map((log, index) => ({
+            id: log.id,
+            userName: users[index].data.username,
+            userEmail: users[index].data.email,
+            paperType: log.paperType,
+            quantity: log.quantity,
+            totalPrice: log.totalPrice,
+            date: log.date,
+          }));
+
           setPaymentLog(logs);
         } else {
           setError("Failed to fetch payment logs");
@@ -45,6 +68,8 @@ const PaymentLog = () => {
           <thead>
             <tr className="bg-gray-100">
               <th className="py-3 px-6 border-b text-left">ID</th>
+              <th className="py-3 px-6 border-b text-left">User Name</th>
+              <th className="py-3 px-6 border-b text-left">User Email</th>
               <th className="py-3 px-6 border-b text-left">Paper Type</th>
               <th className="py-3 px-6 border-b text-left">Quantity</th>
               <th className="py-3 px-6 border-b text-left">Total Price</th>
@@ -58,6 +83,10 @@ const PaymentLog = () => {
                 className="hover:bg-gray-50 transition-colors duration-200"
               >
                 <td className="py-3 px-6 border-b text-left">{log.id}</td>
+                <td className="py-3 px-6 border-b text-left">{log.userName}</td>
+                <td className="py-3 px-6 border-b text-left">
+                  {log.userEmail}
+                </td>
                 <td className="py-3 px-6 border-b text-left">
                   {log.paperType}
                 </td>

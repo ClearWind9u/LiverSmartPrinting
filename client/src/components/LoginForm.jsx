@@ -36,14 +36,18 @@ const LoginForm = () => {
       <div className="flex w-[900px] bg-white shadow-lg rounded-lg overflow-hidden">
         {/* Left Section */}
         <div className="w-1/2 bg-gradient-to-r from-red-300 to-blue-300 p-8 flex flex-col justify-center">
-          <h1 className="text-4xl font-bold text-white mb-4">Liver Smart Printing</h1>
+          <h1 className="text-4xl font-bold text-white mb-4">
+            Liver Smart Printing
+          </h1>
           <p className="text-white text-lg mb-6">Sign in to continue access</p>
           <div className="text-white mt-auto text-sm">hcmut.edu.vn</div>
         </div>
 
         {/* Right Section */}
         <div className="w-1/2 p-8 flex flex-col justify-center">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Sign In</h2>
+          <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+            Sign In
+          </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email Input */}
