@@ -1,28 +1,18 @@
 import React, { useState } from "react";
 
 const ConfigPage = () => {
-  const [activeTab, setActiveTab] = useState("paper");
-
+  const [editingIndex, setEditingIndex] = useState(null); // Index của hàng đang chỉnh sửa
   const [paperTypes, setPaperTypes] = useState([
     { type: "A4", price: 0.1, quantity: 100 },
     { type: "A3", price: 0.5, quantity: 50 },
-    // Add more paper types here
+    { type: "A2", price: 0.8, quantity: 50 },
   ]);
-
-  const [printPrices, setPrintPrices] = useState([
-    { type: "Black & White", price: 0.05 },
-    { type: "Color", price: 0.15 },
-    // Add more print prices here
-  ]);
-
-  const [configs, setConfigs] = useState([
-    { name: "Max Print Jobs", value: 10 },
-    { name: "Default Paper Size", value: "A4" },
-    // Add more configurations here
-  ]);
+  const [isModalOpen, setIsModalOpen] = useState(false); // Trạng thái mở modal
+  const [newPaper, setNewPaper] = useState({ type: "", price: "", quantity: "" }); // Dữ liệu hàng mới
 
   const handleAddPaperType = () => {
-    setPaperTypes([...paperTypes, { type: "", price: 0, quantity: 0 }]);
+    // Mở modal
+    setIsModalOpen(true);
   };
 
   const handlePaperTypeChange = (index, field, value) => {
@@ -31,235 +21,201 @@ const ConfigPage = () => {
     setPaperTypes(newPaperTypes);
   };
 
-  const handleAddPrintPrice = () => {
-    setPrintPrices([...printPrices, { type: "", price: 0 }]);
+  const handleDeletePaperType = (index) => {
+    const newPaperTypes = paperTypes.filter((_, i) => i !== index);
+    setPaperTypes(newPaperTypes);
   };
 
-  const handlePrintPriceChange = (index, field, value) => {
-    const newPrintPrices = [...printPrices];
-    newPrintPrices[index][field] = value;
-    setPrintPrices(newPrintPrices);
+  const handleSave = (index) => {
+    const currentRow = paperTypes[index];
+    // Kiểm tra nếu tất cả các trường đã được nhập
+    if (!currentRow.type || !currentRow.price || !currentRow.quantity) {
+      alert("Please fill in all fields before saving.");
+      return;
+    }
+    setEditingIndex(null); // Kết thúc chỉnh sửa
   };
 
-  const handleConfigChange = (index, field, value) => {
-    const newConfigs = [...configs];
-    newConfigs[index][field] = value;
-    setConfigs(newConfigs);
+  const handleEditToggle = (index) => {
+    setEditingIndex(index); // Bắt đầu chỉnh sửa hàng khác
+  };
+
+  const handleAddNewPaper = () => {
+    // Kiểm tra nếu tất cả các trường đã được nhập
+    if (!newPaper.type || !newPaper.price || !newPaper.quantity) {
+      alert("Please fill in all fields.");
+      return;
+    }
+    setPaperTypes([...paperTypes, newPaper]);
+    setNewPaper({ type: "", price: "", quantity: "" }); // Reset dữ liệu hàng mới
+    setIsModalOpen(false); // Đóng modal
   };
 
   return (
     <div className="pt-16 w-full h-full">
-      <div className="w-3/4 h-5/6 mx-auto mt-6 bg-white p-8 rounded-lg shadow-lg">
+      <div className="w-3/4 mx-auto mt-6 bg-white p-8 rounded-lg shadow-lg">
         <h1 className="text-center text-3xl font-bold mb-6 text-gray-800">
           Configuration Page
         </h1>
-        <div className="flex justify-center mb-8">
+        <h2 className="text-2xl font-semibold mb-4 text-gray-700">
+          Paper Config
+        </h2>
+        <div
+          className="overflow-y-auto"
+          style={{
+            maxHeight: "300px",
+          }}
+        >
+          <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-md">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="py-3 px-6 border-b text-left">Type</th>
+                <th className="py-3 px-6 border-b text-left">Price</th>
+                <th className="py-3 px-6 border-b text-left">Quantity</th>
+                <th className="py-3 px-6 border-b text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paperTypes.map((paper, index) => (
+                <tr
+                  key={index}
+                  className="hover:bg-gray-50 transition-colors duration-200"
+                >
+                  <td className="py-3 px-6 border-b text-left">
+                    <input
+                      type="text"
+                      value={paper.type}
+                      onChange={(e) =>
+                        handlePaperTypeChange(index, "type", e.target.value)
+                      }
+                      disabled={editingIndex !== index}
+                      className={`border rounded w-full p-2 ${editingIndex !== index && "bg-gray-100 cursor-not-allowed"
+                        }`}
+                    />
+                  </td>
+                  <td className="py-3 px-6 border-b text-left">
+                    <input
+                      type="number"
+                      value={paper.price}
+                      onChange={(e) =>
+                        handlePaperTypeChange(index, "price", e.target.value)
+                      }
+                      disabled={editingIndex !== index}
+                      className={`border rounded w-full p-2 ${editingIndex !== index && "bg-gray-100 cursor-not-allowed"
+                        }`}
+                    />
+                  </td>
+                  <td className="py-3 px-6 border-b text-left">
+                    <input
+                      type="number"
+                      value={paper.quantity}
+                      onChange={(e) =>
+                        handlePaperTypeChange(
+                          index,
+                          "quantity",
+                          e.target.value
+                        )
+                      }
+                      disabled={editingIndex !== index}
+                      className={`border rounded w-full p-2 ${editingIndex !== index && "bg-gray-100 cursor-not-allowed"
+                        }`}
+                    />
+                  </td>
+                  <td className="py-3 px-6 border-b text-left">
+                    <div className="flex gap-2 ml-2">
+                      {editingIndex === index ? (
+                        <button
+                          className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                          onClick={() => handleSave(index)}
+                        >
+                          Save
+                        </button>
+                      ) : (
+                        <>
+                          <button
+                            className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                            onClick={() => handleEditToggle(index)}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                            onClick={() => handleDeletePaperType(index)}
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-4">
           <button
-            className={`px-6 py-3 mx-2 transition-colors duration-300 ${
-              activeTab === "paper"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-200 text-gray-800"
-            } rounded-full shadow-md hover:bg-blue-500`}
-            onClick={() => setActiveTab("paper")}
+            className="px-4 py-2 bg-green-500 text-white rounded"
+            onClick={handleAddPaperType}
           >
-            Paper Config
-          </button>
-          <button
-            className={`px-6 py-3 mx-2 transition-colors duration-300 ${
-              activeTab === "printPrice"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-200 text-gray-800"
-            } rounded-full shadow-md hover:bg-blue-500`}
-            onClick={() => setActiveTab("printPrice")}
-          >
-            Print Price Config
-          </button>
-          <button
-            className={`px-6 py-3 mx-2 transition-colors duration-300 ${
-              activeTab === "other"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-200 text-gray-800"
-            } rounded-full shadow-md hover:bg-blue-500`}
-            onClick={() => setActiveTab("other")}
-          >
-            Other Config
+            Add Paper Type
           </button>
         </div>
-        {activeTab === "paper" && (
-          <div>
-            <h2 className="text-2xl font-semibold mb-4 text-gray-700">
-              Paper Config
-            </h2>
-            <div className="overflow-x-auto max-h-96">
-              <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-md">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="py-3 px-6 border-b text-left">Type</th>
-                    <th className="py-3 px-6 border-b text-left">Price</th>
-                    <th className="py-3 px-6 border-b text-left">Quantity</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paperTypes.map((paper, index) => (
-                    <tr
-                      key={index}
-                      className="hover:bg-gray-50 transition-colors duration-200"
-                    >
-                      <td className="py-3 px-6 border-b text-left">
-                        <input
-                          type="text"
-                          value={paper.type}
-                          onChange={(e) =>
-                            handlePaperTypeChange(index, "type", e.target.value)
-                          }
-                          className="border rounded w-full p-2"
-                        />
-                      </td>
-                      <td className="py-3 px-6 border-b text-left">
-                        <input
-                          type="number"
-                          value={paper.price}
-                          onChange={(e) =>
-                            handlePaperTypeChange(
-                              index,
-                              "price",
-                              e.target.value
-                            )
-                          }
-                          className="border rounded w-full p-2"
-                        />
-                      </td>
-                      <td className="py-3 px-6 border-b text-left">
-                        <input
-                          type="number"
-                          value={paper.quantity}
-                          onChange={(e) =>
-                            handlePaperTypeChange(
-                              index,
-                              "quantity",
-                              e.target.value
-                            )
-                          }
-                          className="border rounded w-full p-2"
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="mt-4">
-              <button
-                className="px-4 py-2 bg-green-500 text-white rounded"
-                onClick={handleAddPaperType}
-              >
-                Add Paper Type
-              </button>
-            </div>
-          </div>
-        )}
-        {activeTab === "printPrice" && (
-          <div>
-            <h2 className="text-2xl font-semibold mb-4 text-gray-700">
-              Print Price Config
-            </h2>
-            <div className="overflow-x-auto max-h-96">
-              <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-md">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="py-3 px-6 border-b text-left">Type</th>
-                    <th className="py-3 px-6 border-b text-left">Price</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {printPrices.map((price, index) => (
-                    <tr
-                      key={index}
-                      className="hover:bg-gray-50 transition-colors duration-200"
-                    >
-                      <td className="py-3 px-6 border-b text-left">
-                        <input
-                          type="text"
-                          value={price.type}
-                          onChange={(e) =>
-                            handlePrintPriceChange(
-                              index,
-                              "type",
-                              e.target.value
-                            )
-                          }
-                          className="border rounded w-full p-2"
-                        />
-                      </td>
-                      <td className="py-3 px-6 border-b text-left">
-                        <input
-                          type="number"
-                          value={price.price}
-                          onChange={(e) =>
-                            handlePrintPriceChange(
-                              index,
-                              "price",
-                              e.target.value
-                            )
-                          }
-                          className="border rounded w-full p-2"
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="mt-4">
-              <button
-                className="px-4 py-2 bg-green-500 text-white rounded"
-                onClick={handleAddPrintPrice}
-              >
-                Add Print Price
-              </button>
-            </div>
-          </div>
-        )}
-        {activeTab === "other" && (
-          <div>
-            <h2 className="text-2xl font-semibold mb-4 text-gray-700">
-              Other Config
-            </h2>
-            <div className="overflow-x-auto max-h-96">
-              <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-md">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="py-3 px-6 border-b text-left">Name</th>
-                    <th className="py-3 px-6 border-b text-left">Value</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {configs.map((config, index) => (
-                    <tr
-                      key={index}
-                      className="hover:bg-gray-50 transition-colors duration-200"
-                    >
-                      <td className="py-3 px-6 border-b text-left">
-                        {config.name}
-                      </td>
-                      <td className="py-3 px-6 border-b text-left">
-                        <input
-                          type="text"
-                          value={config.value}
-                          onChange={(e) =>
-                            handleConfigChange(index, "value", e.target.value)
-                          }
-                          className="border rounded w-full p-2"
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-96 shadow-lg p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Add New Paper Type</h2>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                &times;
+              </button>
+            </div>
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Type"
+                value={newPaper.type}
+                onChange={(e) =>
+                  setNewPaper({ ...newPaper, type: e.target.value })
+                }
+                className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
+              />
+              <input
+                type="number"
+                placeholder="Price"
+                value={newPaper.price}
+                onChange={(e) =>
+                  setNewPaper({ ...newPaper, price: e.target.value })
+                }
+                className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
+              />
+              <input
+                type="number"
+                placeholder="Quantity"
+                value={newPaper.quantity}
+                onChange={(e) =>
+                  setNewPaper({ ...newPaper, quantity: e.target.value })
+                }
+                className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring focus:border-blue-300"
+              />
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={handleAddNewPaper}
+                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+              >
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

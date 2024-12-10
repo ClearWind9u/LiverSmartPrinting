@@ -4,8 +4,7 @@ import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSuccess } from "../redux/userSlice";
 import axios from "axios";
-
-import Logo from "../../assets/Logo.png";
+import Logo from "../../assets/Logo.png"
 import HomeIcon from "@mui/icons-material/Home";
 import PrintIcon from "@mui/icons-material/Print";
 import ArticleIcon from "@mui/icons-material/Article";
@@ -86,11 +85,8 @@ const Header = ({ role }) => {
         <div className="w-full flex flex-wrap justify-between mx-auto max-w-screen-xl">
           {/* Logo */}
           <div className="justify-start pl-4 flex items-center">
-            <img
-              src={Logo}
-              alt="Smart Printer Logo"
-              className="max-h-[80px] max-w-[80px] logo"
-            />
+
+            <h1 className="max-h-[150px] max-w-[150px] text-bold text-2xl">LSP</h1>
           </div>
 
           {/* Navigation Links */}
@@ -186,11 +182,24 @@ const Header = ({ role }) => {
                   <div className="px-4 py-2 hover:bg-gray-100">
                     <Link to="/profile">Profile</Link>
                   </div>
+                  {role !== "admin" && (
+                    <>
+                      {/* Printing Log option for non-admin users */}
+                      <div className="px-4 py-2 hover:bg-gray-100">
+                        <Link to="/printinglog">Printing Log</Link>
+                      </div>
+                      <div className="px-4 py-2 hover:bg-gray-100">
+                        <Link to="/paymentlog">Payment Log</Link>
+                      </div>
+
+                    </>
+                  )}
                   <div
                     className="px-4 py-2 hover:bg-gray-100"
                     onClick={() => dispatch(loginSuccess(null))}
                   >
                     <Link to="/">Logout</Link>
+
                   </div>
                 </div>
               </div>

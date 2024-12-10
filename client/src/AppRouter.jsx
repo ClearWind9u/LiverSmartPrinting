@@ -14,6 +14,8 @@ import ReportPage from "./components/ReportPage";
 import BuyPage from "./components/BuyPage";
 import Profile from "./components/Profile";
 import SignUp from "./components/SignUp";
+import StudentPrintingLog from "./components/StudentPrintingLog";
+import StudentPaymentLog from "./components/StudentPaymentLog";
 
 const AppRouter = () => {
   const user = useSelector((state) => state.auth.login?.currentUser);
@@ -36,6 +38,7 @@ const AppRouter = () => {
           path="/"
           element={user ? <App /> : <Navigate to="/login" />}
         >
+
           <Route index element={<Home />} />
           <Route path="printers" element={<PrinterGrid />} />
           <Route path="printer/:id" element={<PrinterForm />} />
@@ -45,6 +48,8 @@ const AppRouter = () => {
           <Route path="pages" element={<BuyPage />} />
           <Route path="buy-paper" element={<BuyPage />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="printinglog" element={<StudentPrintingLog />} />
+          <Route path="paymentlog" element={<StudentPaymentLog />} />
           {/* Thêm các route khác nếu cần */}
         </Route>
 
