@@ -27,7 +27,11 @@ const Header = ({ role }) => {
   };
 
   const handleNextStep = () => {
-    if (!amount || isNaN(amount.replace(/\./g, "")) || parseInt(amount.replace(/\./g, "")) <= 0) {
+    if (
+      !amount ||
+      isNaN(amount.replace(/\./g, "")) ||
+      parseInt(amount.replace(/\./g, "")) <= 0
+    ) {
       alert("Please enter number.");
       return;
     }
@@ -50,21 +54,24 @@ const Header = ({ role }) => {
     setAmount(e.target.value);
   };
 
-  const handleAddBalance = async() => {
+  const handleAddBalance = async () => {
     try {
-      const response = await axios.put(`http://localhost:5000/update-wallet/${user._id}`, {changeWallet : Number(amount)});
+      const response = await axios.put(
+        `http://localhost:5000/update-wallet/${user._id}`,
+        { changeWallet: Number(amount) }
+      );
       if (response.data.success) {
-        const updateUser = { 
+        const updateUser = {
           ...user,
-          wallet : user.wallet + Number(amount)
-        }
+          wallet: user.wallet + Number(amount),
+        };
         dispatch(loginSuccess(updateUser));
         alert(`Add ${amount} successfully!`);
       }
     } catch (error) {
       console.error();
     }
-  }
+  };
 
   const blue = "#1f89db";
   const red = "#f05258";
@@ -74,7 +81,7 @@ const Header = ({ role }) => {
     <>
       <header
         style={{ backgroundColor: bgColor }}
-        className="w-full h-[60px] flex items-center text-[18px] text-white font-semibold"
+        className="w-full h-[60px] flex items-center text-[18px] text-white font-semibold fixed top-0 left-0 right-0 z-50"
       >
         <div className="w-full flex flex-wrap justify-between mx-auto max-w-screen-xl">
           {/* Logo */}
@@ -89,7 +96,10 @@ const Header = ({ role }) => {
           {/* Navigation Links */}
           <ul className="flex flex-row gap-16 items-center justify-center w-9/12">
             <li>
-              <Link to="/" className="flex items-center gap-2 hover:text-gray-700">
+              <Link
+                to="/"
+                className="flex items-center gap-2 hover:text-gray-700"
+              >
                 <HomeIcon className="h-6 w-6" />
                 <span>Home</span>
               </Link>
@@ -97,19 +107,28 @@ const Header = ({ role }) => {
             {role === "admin" ? (
               <>
                 <li>
-                  <Link to="/printers" className="flex items-center gap-2 hover:text-gray-700">
+                  <Link
+                    to="/printers"
+                    className="flex items-center gap-2 hover:text-gray-700"
+                  >
                     <PrintIcon className="h-6 w-6" />
                     <span>Manage Printers</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/configuration" className="flex items-center gap-2 hover:text-gray-700">
+                  <Link
+                    to="/configuration"
+                    className="flex items-center gap-2 hover:text-gray-700"
+                  >
                     <SettingsIcon className="h-6 w-6" />
                     <span>Configuration</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/report" className="flex items-center gap-2 hover:text-gray-700">
+                  <Link
+                    to="/report"
+                    className="flex items-center gap-2 hover:text-gray-700"
+                  >
                     <AssessmentIcon className="h-6 w-6" />
                     <span>Report</span>
                   </Link>
@@ -118,13 +137,19 @@ const Header = ({ role }) => {
             ) : (
               <>
                 <li>
-                  <Link to="/printers" className="flex items-center gap-2 hover:text-gray-700">
+                  <Link
+                    to="/printers"
+                    className="flex items-center gap-2 hover:text-gray-700"
+                  >
                     <PrintIcon className="h-6 w-6" />
                     <span>View Printers</span>
                   </Link>
                 </li>
                 <li>
-                  <Link to="/pages" className="flex items-center gap-2 hover:text-gray-700">
+                  <Link
+                    to="/pages"
+                    className="flex items-center gap-2 hover:text-gray-700"
+                  >
                     <ArticleIcon className="h-6 w-6" />
                     <span>Buy Pages</span>
                   </Link>
@@ -140,11 +165,16 @@ const Header = ({ role }) => {
               onClick={() => setModalOpen(true)}
               className="flex items-center px-1 py-1 rounded-full text-white hover:text-gray-700"
             >
-              {user.role !== 'admin' && <span className="mr-2">+ {user.wallet} VNĐ</span>}
+              {user.role !== "admin" && (
+                <span className="mr-2">+ {user.wallet} VNĐ</span>
+              )}
             </button>
 
             {/* Profile Button */}
-            <button onClick={toggleDropdown} className="focus:outline-none hover:text-gray-700">
+            <button
+              onClick={toggleDropdown}
+              className="focus:outline-none hover:text-gray-700"
+            >
               <PersonIcon className="h-6 w-6" />
             </button>
             {dropdownOpen && (
@@ -187,7 +217,8 @@ const Header = ({ role }) => {
                 />
                 <button
                   onClick={() => handleAddBalance()}
-                  className="w-full bg-green-500 text-white py-2 rounded font-bold hover:bg-green-600">
+                  className="w-full bg-green-500 text-white py-2 rounded font-bold hover:bg-green-600"
+                >
                   Confirm
                 </button>
               </div>
