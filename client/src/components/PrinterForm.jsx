@@ -124,7 +124,9 @@ const PrinterForm = () => {
   };
 
   return (
-    <form className="bg-gray-200 p-4 rounded shadow-lg w-3/4 mx-auto mt-4">
+    <form className="bg-gray-200 p-4 rounded shadow-lg w-3/4 mx-auto mt-4"
+      style={{ height: '745px' }}
+    >
       <h2 className="text-lg font-semibold mb-2 text-center">{printer.name}</h2>
 
       {/* File Upload */}
@@ -307,7 +309,7 @@ const PrinterForm = () => {
         </div>
       )}
       {/* Buttons */}
-      <div className="flex justify-between mt-3">
+      <div className="flex justify-between mt-2">
         <Link to="/printers" className="px-4 py-2 bg-gray-300 rounded">
           Cancel
         </Link>
