@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import axios from "axios";
 import Modal from "./Modal";
 
 const AccountManagement = () => {
@@ -7,7 +6,49 @@ const AccountManagement = () => {
   const [modalContent, setModalContent] = useState(null);
   const [selectedAccount, setSelectedAccount] = useState(null);
 
-  // const accountLog = axios.get("http://localhost:5000/accounts").data;
+  const accountLog = [
+    {
+      id: 1,
+      username: "user1",
+      email: "user1@example.com",
+      role: "admin",
+      dateCreated: "2023-01-01",
+    },
+    {
+      id: 2,
+      username: "user2",
+      email: "user2@example.com",
+      role: "user",
+      dateCreated: "2023-02-01",
+    },
+    {
+      id: 3,
+      username: "user3",
+      email: "user3@example.com",
+      role: "user",
+      dateCreated: "2023-03-01",
+    },
+    {
+      id: 4,
+      username: "user3",
+      email: "user3@example.com",
+      role: "user",
+      dateCreated: "2023-03-01",
+    },
+    {
+      id: 3,
+      username: "user3",
+      email: "user3@example.com",
+      role: "user",
+      dateCreated: "2023-03-01",
+    }, {
+      id: 3,
+      username: "user3",
+      email: "user3@example.com",
+      role: "user",
+      dateCreated: "2023-03-01",
+    },
+  ];
 
   const openModal = (content, account = null) => {
     setModalContent(content);
@@ -28,18 +69,19 @@ const AccountManagement = () => {
       </h2>
       <div className="mb-4">
         <button
-          className="px-4 py-2 bg-green-500 text-white rounded"
+          className="px-2 py-1 bg-green-500 text-white rounded"
           onClick={() => openModal("add")}
         >
           Add Account
         </button>
       </div>
-      <div className="overflow-x-auto max-h-96">
+      <div className="overflow-x-auto max-h-[300px]">
         <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-md">
           <thead>
             <tr className="bg-gray-100">
               <th className="py-3 px-6 border-b text-left">ID</th>
               <th className="py-3 px-6 border-b text-left">Username</th>
+              <th className="py-3 px-6 border-b text-left">Email</th>
               <th className="py-3 px-6 border-b text-left">Role</th>
               <th className="py-3 px-6 border-b text-left">Date Created</th>
               <th className="py-3 px-6 border-b text-left">Actions</th>
@@ -53,10 +95,9 @@ const AccountManagement = () => {
               >
                 <td className="py-3 px-6 border-b text-left">{log.id}</td>
                 <td className="py-3 px-6 border-b text-left">{log.username}</td>
+                <td className="py-3 px-6 border-b text-left">{log.email}</td>
                 <td className="py-3 px-6 border-b text-left">{log.role}</td>
-                <td className="py-3 px-6 border-b text-left">
-                  {log.dateCreated}
-                </td>
+                <td className="py-3 px-6 border-b text-left">{log.dateCreated}</td>
                 <td className="py-3 px-6 border-b text-left">
                   <button
                     className="px-2 py-1 bg-blue-500 text-white rounded mr-2"
@@ -94,80 +135,210 @@ const AccountManagement = () => {
   );
 };
 
-const AddAccountForm = ({ onClose }) => (
-  <div>
-    <h2 className="text-xl font-semibold mb-4">Add Account</h2>
-    <form>
-      <div className="mb-4">
-        <label className="block font-medium mb-1">Username:</label>
-        <input type="text" className="border rounded w-full p-2" />
-      </div>
-      <div className="mb-4">
-        <label className="block font-medium mb-1">Role:</label>
-        <select className="border rounded w-full p-2">
-          <option>admin</option>
-          <option>user</option>
-        </select>
-      </div>
-      <div className="flex justify-end">
-        <button
-          type="button"
-          className="px-4 py-2 bg-gray-300 rounded mr-2"
-          onClick={onClose}
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-500 text-white rounded"
-        >
-          Add
-        </button>
-      </div>
-    </form>
-  </div>
-);
+const AddAccountForm = ({ onClose }) => {
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+    confirmPassword: "",
+    email: "",
+    role: "user",
+  });
 
-const EditAccountForm = ({ account, onClose }) => (
-  <div>
-    <h2 className="text-xl font-semibold mb-4">Edit Account</h2>
-    <form>
-      <div className="mb-4">
-        <label className="block font-medium mb-1">Username:</label>
-        <input
-          type="text"
-          defaultValue={account.username}
-          className="border rounded w-full p-2"
-        />
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+    // Process form submission logic here
+    console.log("Account added:", formData);
+    onClose();
+  };
+
+  return (
+    <div>
+      <h2 className="text-xl font-semibold mb-4">Add Account</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label className="block font-medium mb-1">Username:</label>
+          <input
+            type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            className="border rounded w-full p-2"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block font-medium mb-1">Email:</label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            className="border rounded w-full p-2"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block font-medium mb-1">Password:</label>
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            className="border rounded w-full p-2"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block font-medium mb-1">Confirm Password:</label>
+          <input
+            type="password"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            className="border rounded w-full p-2"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block font-medium mb-1">Role:</label>
+          <select
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            className="border rounded w-full p-2"
+          >
+            <option value="admin">admin</option>
+            <option value="user">user</option>
+          </select>
+        </div>
+        <div className="flex justify-end">
+          <button
+            type="button"
+            className="px-4 py-2 bg-gray-300 rounded mr-2"
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-500 text-white rounded"
+          >
+            Add
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+const EditAccountForm = ({ account, onClose }) => {
+  const [formData, setFormData] = useState({
+    username: account.username,
+    email: account.email,
+    role: account.role,
+    password: "",
+    confirmPassword: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (formData.password && formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+    // Process form submission logic here
+    console.log("Account updated:", formData);
+    onClose();
+  };
+
+  return (
+    <div>
+      <h2 className="text-xl font-semibold mb-4">Edit Account</h2>
+      <div className="overflow-x-auto max-h-96">
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block font-medium mb-1">Username:</label>
+            <input
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              className="border rounded w-full p-2"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium mb-1">Email:</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="border rounded w-full p-2"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium mb-1">Password (Optional):</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="border rounded w-full p-2"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium mb-1">Confirm Password:</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              className="border rounded w-full p-2"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium mb-1">Role:</label>
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="border rounded w-full p-2"
+            >
+              <option value="admin">admin</option>
+              <option value="user">user</option>
+            </select>
+          </div>
+          <div className="flex justify-end">
+            <button
+              type="button"
+              className="px-4 py-2 bg-gray-300 rounded mr-2"
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-500 text-white rounded"
+            >
+              Save
+            </button>
+          </div>
+        </form>
       </div>
-      <div className="mb-4">
-        <label className="block font-medium mb-1">Role:</label>
-        <select
-          defaultValue={account.role}
-          className="border rounded w-full p-2"
-        >
-          <option>admin</option>
-          <option>user</option>
-        </select>
-      </div>
-      <div className="flex justify-end">
-        <button
-          type="button"
-          className="px-4 py-2 bg-gray-300 rounded mr-2"
-          onClick={onClose}
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-500 text-white rounded"
-        >
-          Save
-        </button>
-      </div>
-    </form>
-  </div>
-);
+    </div>
+
+  );
+};
 
 const DeleteAccountConfirmation = ({ account, onClose }) => (
   <div>

@@ -813,6 +813,11 @@ video {
 }
 
 
+.max-h-\[300px\] {
+  max-height: 350px;
+}
+
+
 .max-w-\[150px\] {
   max-width: 150px;
 }
@@ -1273,6 +1278,10 @@ video {
 
 .pt-8 {
   padding-top: 2rem;
+}
+
+.pt-\[190px\] {
+  padding-top: 140px;
 }
 
 .pt-\[200px\] {

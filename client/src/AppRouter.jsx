@@ -16,6 +16,7 @@ import Profile from "./components/Profile";
 import SignUp from "./components/SignUp";
 import StudentPrintingLog from "./components/StudentPrintingLog";
 import StudentPaymentLog from "./components/StudentPaymentLog";
+import AccountManagement from "./components/AccountManagement";
 
 const AppRouter = () => {
   const user = useSelector((state) => state.auth.login?.currentUser);
@@ -50,6 +51,8 @@ const AppRouter = () => {
           <Route path="profile" element={<Profile />} />
           <Route path="printinglog" element={<StudentPrintingLog />} />
           <Route path="paymentlog" element={<StudentPaymentLog />} />
+          <Route path="account" element={<AccountManagement />} />
+
           {/* Thêm các route khác nếu cần */}
         </Route>
 
