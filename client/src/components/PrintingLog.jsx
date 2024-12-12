@@ -1,23 +1,24 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import SwapVertIcon from '@mui/icons-material/SwapVert';
 
 const PrintingLog = () => {
   const [printingLog, setPrintingLog] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
 
   useEffect(() => {
     const fetchPrintingLogs = async () => {
       try {
         const response = await axios.get("http://localhost:5000/histories");
         if (response.data.success) {
-          // Duyệt qua từng lịch sử in và ánh xạ dữ liệu cần thiết
           const printInfo = response.data.histories.flatMap((history) =>
             history.printInfo.map((info, index) => ({
               id: `${history._id}`,
               fileName: info.fileName,
               copies: info.noCopy,
-              date: new Date(info.time).toLocaleDateString(), // Định dạng ngày tháng
+              date: new Date(info.time).toLocaleDateString(),
             }))
           );
           const userId = response.data.histories.map(
@@ -37,11 +38,18 @@ const PrintingLog = () => {
             (history) => history.printerId
           );
 
+          const printers = await Promise.all(
+            printerId.map(async (id) => {
+              const response = await axios.get(
+                "http://localhost:5000/printers/" + id
+              );
+              return response.data;
+            })
+          );
           const logs = printInfo.map((info, index) => ({
             id: info.id,
             userName: users[index].data.username,
-            userEmail: users[index].data.email,
-            printerId: printerId[index],
+            printerName: printers[index].printer.name,
             fileName: info.fileName,
             copies: info.copies,
             date: info.date,
@@ -61,6 +69,25 @@ const PrintingLog = () => {
     fetchPrintingLogs();
   }, []);
 
+  const handleSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+
+    const sortedData = [...printingLog].sort((a, b) => {
+      if (a[key] < b[key]) {
+        return direction === "asc" ? -1 : 1;
+      }
+      if (a[key] > b[key]) {
+        return direction === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+    setPrintingLog(sortedData);
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
 
@@ -73,13 +100,42 @@ const PrintingLog = () => {
         <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-md">
           <thead>
             <tr className="bg-gray-100">
-              <th className="py-3 px-6 border-b text-left">ID</th>
-              <th className="py-3 px-6 border-b text-left">User Name</th>
-              <th className="py-3 px-6 border-b text-left">User Email</th>
-              <th className="py-3 px-6 border-b text-left">Printer Id</th>
-              <th className="py-3 px-6 border-b text-left">File Name</th>
-              <th className="py-3 px-6 border-b text-left">Copies</th>
-              <th className="py-3 px-6 border-b text-left">Date</th>
+              <th
+                className="py-3 px-6 border-b text-left cursor-pointer"
+                onClick={() => handleSort("id")}
+              >
+                ID <SwapVertIcon />
+              </th>
+              <th
+                className="py-3 px-6 border-b text-left cursor-pointer"
+                onClick={() => handleSort("userName")}
+              >
+                User Name <SwapVertIcon />
+              </th>
+              <th
+                className="py-3 px-7 border-b text-left cursor-pointer"
+                onClick={() => handleSort("printerName")}
+              >
+                Printer Name <SwapVertIcon />
+              </th>
+              <th
+                className="py-3 px-6 border-b text-left cursor-pointer"
+                onClick={() => handleSort("fileName")}
+              >
+                File Name <SwapVertIcon />
+              </th>
+              <th
+                className="py-3 px-6 border-b text-left cursor-pointer"
+                onClick={() => handleSort("copies")}
+              >
+                Copies <SwapVertIcon />
+              </th>
+              <th
+                className="py-3 px-6 border-b text-left cursor-pointer"
+                onClick={() => handleSort("date")}
+              >
+                Date <SwapVertIcon />
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -90,12 +146,7 @@ const PrintingLog = () => {
               >
                 <td className="py-3 px-6 border-b text-left">{log.id}</td>
                 <td className="py-3 px-6 border-b text-left">{log.userName}</td>
-                <td className="py-3 px-6 border-b text-left">
-                  {log.userEmail}
-                </td>
-                <td className="py-3 px-6 border-b text-left">
-                  {log.printerId}
-                </td>
+                <td className="py-3 px-7 border-b text-left">{log.printerName}</td>
                 <td className="py-3 px-6 border-b text-left">{log.fileName}</td>
                 <td className="py-3 px-6 border-b text-left">{log.copies}</td>
                 <td className="py-3 px-6 border-b text-left">{log.date}</td>

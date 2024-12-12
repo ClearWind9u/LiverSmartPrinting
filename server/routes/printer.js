@@ -18,9 +18,15 @@ router.get('/', async (req, res) => {
 
 //View printer by printerId
 router.get('/:id', async (req, res) => {
-    const id = req.params.id;
+    const { id } = req.params;
     try {
         const printer = await Printer.findById(id);
+        if (!printer) {
+            return res.status(404).json({
+              success: false,
+              message: 'Printer not found',
+            });
+          }
         res.json({ success: true, printer });
     } catch (error) {
         console.log(error);

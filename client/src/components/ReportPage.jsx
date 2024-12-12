@@ -19,8 +19,7 @@ const ReportPage = () => {
                 ? "bg-blue-600 text-white"
                 : "bg-gray-200 text-gray-800"
             } rounded-full shadow-md hover:bg-blue-500`}
-            onClick={() => setActiveTab("printing")}
-          >
+            onClick={() => setActiveTab("printing")}>
             Printing Log
           </button>
           <button
@@ -29,8 +28,7 @@ const ReportPage = () => {
                 ? "bg-blue-600 text-white"
                 : "bg-gray-200 text-gray-800"
             } rounded-full shadow-md hover:bg-blue-500`}
-            onClick={() => setActiveTab("payment")}
-          >
+            onClick={() => setActiveTab("payment")}>
             Payment Log
           </button>
           <button
@@ -39,8 +37,7 @@ const ReportPage = () => {
                 ? "bg-blue-600 text-white"
                 : "bg-gray-200 text-gray-800"
             } rounded-full shadow-md hover:bg-blue-500`}
-            onClick={() => setActiveTab("account")}
-          >
+            onClick={() => setActiveTab("account")}>
             Account Management
           </button>
         </div>

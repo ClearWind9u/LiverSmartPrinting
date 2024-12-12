@@ -12,13 +12,18 @@ router.post('/register', async (req, res) => {
   const { email, password, username, role } = req.body;
   try {
     // Kiểm tra xem email đã tồn tại hay chưa
-    const existingUser = await User.findOne({ email });
+    let existingUser = await User.findOne({ email });
     if (existingUser) {
       return res
         .status(400)
         .json({ success: false, message: 'Email already taken' });
     }
-
+    existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Username already taken' });
+    }
     // Mã hóa mật khẩu
     const hashedPassword = await argon2.hash(password);
     const balancePages = await BalancePage.find();
@@ -74,7 +79,25 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Xem thông tin chi tiết của người dùng
+// Xem thông tin chi tiết của tất cả người dùng
+router.get('/users', async (req, res) => {
+  try {
+    // Lấy toàn bộ người dùng, loại trừ trường password
+    const users = await User.find().select('-password');
+    res.json({
+      success: true,
+      data: users,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+});
+
+// Xem thông tin chi tiết của người dùng theo Id
 router.get('/user/:userId', async (req, res) => {
   const { userId } = req.params;
   try {
@@ -86,8 +109,6 @@ router.get('/user/:userId', async (req, res) => {
         message: 'User not found',
       });
     }
-
-    // Trả về thông tin người dùng
     res.json({
       success: true,
       data: user,

@@ -1,24 +1,25 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import SwapVertIcon from "@mui/icons-material/SwapVert";
 
 const PaymentLog = () => {
   const [paymentLog, setPaymentLog] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
 
   useEffect(() => {
     const fetchPaymentLogs = async () => {
       try {
         const response = await axios.get("http://localhost:5000/pages");
         if (response.data.success) {
-          // Ánh xạ dữ liệu từ API
           const buyData = response.data.buypages.map((log, index) => ({
-            id: `${log._id}`, // Tạo ID duy nhất
+            id: `${log._id}`,
             userId: log.userId,
             paperType: log.type,
             quantity: log.quantity,
-            totalPrice: `${log.totalPrice} VNĐ`, // Định dạng giá
-            date: new Date(log.time).toLocaleDateString(), // Định dạng ngày
+            totalPrice: `${log.totalPrice} VNĐ`,
+            date: new Date(log.time).toLocaleDateString(),
           }));
 
           const userId = buyData.map((log) => log.userId);
@@ -35,7 +36,6 @@ const PaymentLog = () => {
           const logs = buyData.map((log, index) => ({
             id: log.id,
             userName: users[index].data.username,
-            userEmail: users[index].data.email,
             paperType: log.paperType,
             quantity: log.quantity,
             totalPrice: log.totalPrice,
@@ -57,6 +57,21 @@ const PaymentLog = () => {
     fetchPaymentLogs();
   }, []);
 
+  const handleSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+
+    const sortedData = [...paymentLog].sort((a, b) => {
+      if (a[key] < b[key]) return direction === "asc" ? -1 : 1;
+      if (a[key] > b[key]) return direction === "asc" ? 1 : -1;
+      return 0;
+    });
+    setPaymentLog(sortedData);
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
 
@@ -67,13 +82,25 @@ const PaymentLog = () => {
         <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-md">
           <thead>
             <tr className="bg-gray-100">
-              <th className="py-3 px-6 border-b text-left">ID</th>
-              <th className="py-3 px-6 border-b text-left">User Name</th>
-              <th className="py-3 px-6 border-b text-left">User Email</th>
-              <th className="py-3 px-6 border-b text-left">Paper Type</th>
-              <th className="py-3 px-6 border-b text-left">Quantity</th>
-              <th className="py-3 px-6 border-b text-left">Total Price</th>
-              <th className="py-3 px-6 border-b text-left">Date</th>
+              {["ID", "User Name", "Paper Type", "Quantity", "Total Price", "Date"].map((col, index) => {
+                // Hàm chuyển đổi tiêu đề sang định dạng yêu cầu
+                const convertKey = (str) => {
+                  const words = str.split(" ");
+                  return words
+                    .map((word, idx) => idx === 0 ? word.toLowerCase() : word.charAt(0).toUpperCase() + word.slice(1))
+                    .join("");
+                };
+                const key = convertKey(col);
+                return (
+                  <th
+                    key={index}
+                    className="py-3 px-6 border-b text-left cursor-pointer"
+                    onClick={() => handleSort(key)}
+                  >
+                    {col} <SwapVertIcon />
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
@@ -84,16 +111,9 @@ const PaymentLog = () => {
               >
                 <td className="py-3 px-6 border-b text-left">{log.id}</td>
                 <td className="py-3 px-6 border-b text-left">{log.userName}</td>
-                <td className="py-3 px-6 border-b text-left">
-                  {log.userEmail}
-                </td>
-                <td className="py-3 px-6 border-b text-left">
-                  {log.paperType}
-                </td>
+                <td className="py-3 px-6 border-b text-left">{log.paperType}</td>
                 <td className="py-3 px-6 border-b text-left">{log.quantity}</td>
-                <td className="py-3 px-6 border-b text-left">
-                  {log.totalPrice}
-                </td>
+                <td className="py-3 px-6 border-b text-left">{log.totalPrice}</td>
                 <td className="py-3 px-6 border-b text-left">{log.date}</td>
               </tr>
             ))}

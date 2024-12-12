@@ -51,7 +51,8 @@ const Header = ({ role }) => {
           wallet: user.wallet + Number(amount),
         };
         dispatch(loginSuccess(updateUser));
-        alert(`Add ${amount} successfully!`);
+        alert(`Add ${amount} VNĐ successfully!`);
+        setAmount("");
       }
     } catch (error) {
       console.error();
