@@ -17,7 +17,6 @@ router.get('/', async (req, res) => {
 // View buypage by userId
 router.get('/:userId', async (req, res) => {
     const userId = req.params.userId;
-
     try {
         // Tìm lịch sử theo userId
         const buypage = await BuyPage.find({ userId });

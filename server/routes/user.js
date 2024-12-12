@@ -10,13 +10,6 @@ const router = express.Router();
 //Create (Register) a user 
 router.post('/register', async (req, res) => {
   const { email, password, username, role } = req.body;
-
-  if (!email || !password || !username) {
-    return res
-      .status(400)
-      .json({ success: false, message: 'Missing email, password and/or username' });
-  }
-
   try {
     // Kiểm tra xem email đã tồn tại hay chưa
     const existingUser = await User.findOne({ email });
@@ -30,16 +23,19 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await argon2.hash(password);
     const balancePages = await BalancePage.find();
 
+    // Thiết lập role mặc định nếu không truyền
+    const userRole = role || 'user';
+    let wallet = 0;
+
     // Tạo danh sách balancePage cho người dùng
-    const userBalancePage = role === 'admin'
+    const userBalancePage = (userRole === 'admin')
       ? [] // Admin có balancePage rỗng
       : balancePages.map((page) => ({
-        type: page.type,
-        balance: page.balance,
-      }));
-    let wallet = 0; 
+          type: page.type,
+          balance: page.balance,
+        })); 
 
-    const newUser = new User({ username, email, password: hashedPassword, role, balancePage: userBalancePage, wallet });
+    const newUser = new User({ username, email, password: hashedPassword, role: userRole, balancePage: userBalancePage, wallet });
     await newUser.save();
     res.json({ success: true, message: 'User created successfully', newUser });
   } catch (error) {

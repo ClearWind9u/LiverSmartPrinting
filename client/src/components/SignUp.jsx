@@ -32,11 +32,11 @@ const SignUp = () => {
         const userData = {
             username,
             email,
-            password,
+            password
         };
 
         try {
-            const response = await axios.post("http://localhost:5000/signup", userData);
+            const response = await axios.post("http://localhost:5000/register", userData);
             const data = response.data;
 
             if (data.success) {
@@ -47,7 +47,7 @@ const SignUp = () => {
             }
         } catch (error) {
             console.error("Error:", error.response?.data || error.message);
-            setErrorMessage("An error occurred during registration.");
+            setErrorMessage(error.response?.data.message || error.message);
         }
     };
 

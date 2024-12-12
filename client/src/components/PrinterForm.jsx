@@ -125,189 +125,193 @@ const PrinterForm = () => {
 
   return (
     <form className="bg-gray-200 p-4 rounded shadow-lg w-3/4 mx-auto mt-4"
-      style={{ height: '745px' }}
+      style={{ marginTop: '80px' }}
     >
       <h2 className="text-lg font-semibold mb-2 text-center">{printer.name}</h2>
 
       {/* File Upload */}
-      {!filePreviewUrl && (
-        <div className="mb-3">
-          <label className="block font-medium mb-2">Upload file to print:</label>
-          <div className="border border-dashed border-gray-400 rounded flex justify-center items-center p-4">
-            <input
-              type="file"
-              onChange={handleFileChange}
-              accept="application/pdf" // Chỉ chấp nhận file PDF (hoặc mở rộng nếu cần)
-              className="hidden"
-              id="fileInput"
-            />
-            <label htmlFor="fileInput" className="cursor-pointer text-blue-500">
-              Select file or <span className="underline">Drag file here</span>
-            </label>
+      {
+        !filePreviewUrl && (
+          <div className="mb-3">
+            <label className="block font-medium mb-2">Upload file to print:</label>
+            <div className="border border-dashed border-gray-400 rounded flex justify-center items-center p-4">
+              <input
+                type="file"
+                onChange={handleFileChange}
+                accept="application/pdf" // Chỉ chấp nhận file PDF (hoặc mở rộng nếu cần)
+                className="hidden"
+                id="fileInput"
+              />
+              <label htmlFor="fileInput" className="cursor-pointer text-blue-500">
+                Select file or <span className="underline">Drag file here</span>
+              </label>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* File Preview */}
-      {filePreviewUrl && (
-        <div className="grid grid-cols-2 gap-2">
-          {/* File Preview */}
-          <div className="mb-3">
-            <label className="block font-medium mb-1">Preview:</label>
-            <div className="border border-gray-400 rounded overflow-hidden">
-              <iframe
-                src={filePreviewUrl}
-                className="w-full h-full"
-                style={{ height: '590px' }}
-                title="File Preview"
-              ></iframe>
+      {
+        filePreviewUrl && (
+          <div className="grid grid-cols-2 gap-2" style={{ height: '630px' }}>
+            {/* File Preview */}
+            <div className="mb-3">
+              <label className="block font-medium mb-1">Preview:</label>
+              <div className="border border-gray-400 rounded overflow-hidden">
+                <iframe
+                  src={filePreviewUrl}
+                  className="w-full h-full"
+                  style={{ height: '590px' }}
+                  title="File Preview"
+                ></iframe>
+              </div>
             </div>
-          </div>
 
-          {/* Settings */}
-          <div>
-            <div className="grid grid-cols-1 gap-4">
-              <div className="mb-2">
-                <label className="block font-medium mb-1">Number of copies:</label>
-                <input
-                  type="number"
-                  value={copies}
-                  onChange={(e) => setCopies(e.target.value)}
-                  className="border rounded w-full p-2"
-                  min="1"
-                />
-              </div>
+            {/* Settings */}
+            <div>
+              <div className="grid grid-cols-1 gap-4">
+                <div className="mb-2">
+                  <label className="block font-medium mb-1">Number of copies:</label>
+                  <input
+                    type="number"
+                    value={copies}
+                    onChange={(e) => setCopies(e.target.value)}
+                    className="border rounded w-full p-2"
+                    min="1"
+                  />
+                </div>
 
-              <div className="mb-2">
-                <label className="block font-medium mb-1">Color mode:</label>
-                <select
-                  value={colorMode}
-                  onChange={(e) => setColorMode(e.target.value)}
-                  className="border rounded w-full p-2">
-                  <option value="as-a-printer">As a printer</option>
-                  <option value="black-white">Black & White</option>
-                  <option value="color">Color</option>
-                </select>
-              </div>
+                <div className="mb-2">
+                  <label className="block font-medium mb-1">Color mode:</label>
+                  <select
+                    value={colorMode}
+                    onChange={(e) => setColorMode(e.target.value)}
+                    className="border rounded w-full p-2">
+                    <option value="as-a-printer">As a printer</option>
+                    <option value="black-white">Black & White</option>
+                    <option value="color">Color</option>
+                  </select>
+                </div>
 
-              <div className="mb-2">
-                <label className="block font-medium mb-1">Page orientation:</label>
-                <select
-                  value={pageOrientation}
-                  onChange={(e) => setPageOrientation(e.target.value)}
-                  className="border rounded w-full p-2"
-                >
-                  <option value="as-in-document">As in document</option>
-                  <option value="portrait">Portrait</option>
-                  <option value="landscape">Landscape</option>
-                </select>
-              </div>
+                <div className="mb-2">
+                  <label className="block font-medium mb-1">Page orientation:</label>
+                  <select
+                    value={pageOrientation}
+                    onChange={(e) => setPageOrientation(e.target.value)}
+                    className="border rounded w-full p-2"
+                  >
+                    <option value="as-in-document">As in document</option>
+                    <option value="portrait">Portrait</option>
+                    <option value="landscape">Landscape</option>
+                  </select>
+                </div>
 
-              <div className="mb-2">
-                <label className="block font-medium mb-1">Multiple pages per sheet:</label>
-                <select
-                  value={pagesPerSheet}
-                  onChange={(e) => setPagesPerSheet(e.target.value)}
-                  className="border rounded w-full p-2"
-                >
-                  <option value="1">1 page</option>
-                  <option value="2">2 pages</option>
-                  <option value="4">4 pages</option>
-                </select>
-              </div>
+                <div className="mb-2">
+                  <label className="block font-medium mb-1">Multiple pages per sheet:</label>
+                  <select
+                    value={pagesPerSheet}
+                    onChange={(e) => setPagesPerSheet(e.target.value)}
+                    className="border rounded w-full p-2"
+                  >
+                    <option value="1">1 page</option>
+                    <option value="2">2 pages</option>
+                    <option value="4">4 pages</option>
+                  </select>
+                </div>
 
-              <div className="mb-2">
-                <label className="block font-medium mb-1">Page size:</label>
-                <select
-                  value={pageSize}
-                  onChange={(e) => setPageSize(e.target.value)}
-                  className="border rounded w-full p-2"
-                >
-                  <option>A0</option>
-                  <option>A1</option>
-                  <option>A2</option>
-                  <option>A3</option>
-                  <option>A4</option>
-                  <option>A5</option>
-                </select>
-              </div>
+                <div className="mb-2">
+                  <label className="block font-medium mb-1">Page size:</label>
+                  <select
+                    value={pageSize}
+                    onChange={(e) => setPageSize(e.target.value)}
+                    className="border rounded w-full p-2"
+                  >
+                    <option>A0</option>
+                    <option>A1</option>
+                    <option>A2</option>
+                    <option>A3</option>
+                    <option>A4</option>
+                    <option>A5</option>
+                  </select>
+                </div>
 
-              <div className="mb-1">
-                <label className="block font-medium mb-1">Page range:</label>
-                <div className="flex items-center">
-                  <label className="mr-2">
-                    <input
-                      type="radio"
-                      name="pageRange"
-                      value="All"
-                      checked={pageRange === "all"}
-                      onChange={() => setPageRange("all")}
-                      className="mr-1"
-                    />
-                    All
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="pageRange"
-                      value="Pages"
-                      checked={pageRange !== "all"}
-                      onChange={() => setPageRange(null)}
-                      className="mr-1"
-                    />
-                    Pages
-                  </label>
-                  {pageRange !== "all" && (
-                    <input
-                      type="text"
-                      placeholder="e.g., 1-5"
-                      onChange={(e) => setPageRange(e.target.value)}
-                      className="border rounded ml-3"
-                    />
-                  )}
+                <div className="mb-1">
+                  <label className="block font-medium mb-1">Page range:</label>
+                  <div className="flex items-center">
+                    <label className="mr-2">
+                      <input
+                        type="radio"
+                        name="pageRange"
+                        value="All"
+                        checked={pageRange === "all"}
+                        onChange={() => setPageRange("all")}
+                        className="mr-1"
+                      />
+                      All
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="pageRange"
+                        value="Pages"
+                        checked={pageRange !== "all"}
+                        onChange={() => setPageRange(null)}
+                        className="mr-1"
+                      />
+                      Pages
+                    </label>
+                    {pageRange !== "all" && (
+                      <input
+                        type="text"
+                        placeholder="e.g., 1-5"
+                        onChange={(e) => setPageRange(e.target.value)}
+                        className="border rounded ml-3"
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <label className="block font-medium mb-1">Sides:</label>
+                  <div className="flex items-center">
+                    <label className="mr-2">
+                      <input
+                        type="radio"
+                        name="printSides"
+                        value="one"
+                        checked={printSides === "one"}
+                        onChange={() => setPrintSides("one")}
+                        className="mr-1"
+                      />
+                      Print one sided
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="printSides"
+                        value="both"
+                        checked={printSides === "both"}
+                        onChange={() => setPrintSides("both")}
+                        className="mr-1"
+                      />
+                      Print on both sides
+                    </label>
+                  </div>
                 </div>
               </div>
 
-              <div className="mb-3">
-                <label className="block font-medium mb-1">Sides:</label>
-                <div className="flex items-center">
-                  <label className="mr-2">
-                    <input
-                      type="radio"
-                      name="printSides"
-                      value="one"
-                      checked={printSides === "one"}
-                      onChange={() => setPrintSides("one")}
-                      className="mr-1"
-                    />
-                    Print one sided
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="printSides"
-                      value="both"
-                      checked={printSides === "both"}
-                      onChange={() => setPrintSides("both")}
-                      className="mr-1"
-                    />
-                    Print on both sides
-                  </label>
-                </div>
+              <div className="mb-2 flex items-center">
+                <Link
+                  to="/buy-paper"
+                  className="px-4 py-2 bg-green-500 text-white rounded">
+                  Buy Pages
+                </Link>
+                <span className="ml-4">Balance Pages: {balancePage}</span>
               </div>
             </div>
-
-            <div className="mb-2 flex items-center">
-              <Link
-                to="/buy-paper"
-                className="px-4 py-2 bg-green-500 text-white rounded">
-                Buy Pages
-              </Link>
-              <span className="ml-4">Balance Pages: {balancePage}</span>
-            </div>
           </div>
-        </div>
-      )}
+        )
+      }
       {/* Buttons */}
       <div className="flex justify-between mt-2">
         <Link to="/printers" className="px-4 py-2 bg-gray-300 rounded">
@@ -320,7 +324,7 @@ const PrinterForm = () => {
           Print
         </button>
       </div>
-    </form>
+    </form >
   )
 };
 

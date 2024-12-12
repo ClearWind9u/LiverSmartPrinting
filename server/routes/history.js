@@ -17,7 +17,6 @@ router.get('/', async (req, res) => {
 // View history by userId
 router.get('/user/:userId', async (req, res) => {
     const userId = req.params.userId;
-
     try {
         // Tìm lịch sử theo userId
         const history = await History.find({ userId });

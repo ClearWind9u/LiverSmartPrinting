@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import axios from "axios";
 import Modal from "./Modal";
 
 const AccountManagement = () => {
@@ -7,7 +6,12 @@ const AccountManagement = () => {
   const [modalContent, setModalContent] = useState(null);
   const [selectedAccount, setSelectedAccount] = useState(null);
 
-  // const accountLog = axios.get("http://localhost:5000/accounts").data;
+  const accountLog = [
+    { id: 1, username: "user1", role: "admin", dateCreated: "2023-01-01" },
+    { id: 2, username: "user2", role: "user", dateCreated: "2023-02-01" },
+    { id: 3, username: "user3", role: "user", dateCreated: "2023-03-01" },
+    // Add more account log entries here
+  ];
 
   const openModal = (content, account = null) => {
     setModalContent(content);
