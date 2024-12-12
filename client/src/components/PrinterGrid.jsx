@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import PrinterCard from "./PriterCard";
+import PrinterCard from "./PrinterCard";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axios from "axios";
@@ -8,22 +8,24 @@ const PrinterGrid = ({ role }) => {
   const [printers, setPrinters] = useState([]);
   const user = useSelector((state) => state.auth.login?.currentUser);
 
+  const fetchPrinters = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/printers", {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      setPrinters(response.data.printers);
+    } catch (error) {
+      console.error("Error fetching printers:", error);
+    }
+  };
   useEffect(() => {
-    const fetchPrinters = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/printers", {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        setPrinters(response.data.printers);
-      } catch (error) {
-        console.error("Error fetching printers:", error);
-      }
-    };
-
     fetchPrinters();
   }, []);
+  useEffect(() => {
+    fetchPrinters();
+  }, [printers]);
 
   return (
     <div className="w-3/4 pt-20 mx-auto">

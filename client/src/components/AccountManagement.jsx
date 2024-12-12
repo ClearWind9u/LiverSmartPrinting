@@ -38,15 +38,14 @@ const AccountManagement = () => {
   const handleUpdateAccount = async (updatedAccount) => {
     try {
       const response = await axios.put(
-        `http://localhost:5000/update/${selectedAccount._id}`,
-        updatedAccount
-      );
+        `http://localhost:5000/update/${selectedAccount._id}`, updatedAccount);
       setAccounts((prev) =>
         prev.map((acc) => (acc._id === selectedAccount._id ? response.data.updatedUser : acc))
       );
       setIsModalOpen(false);
-      console.log("Acc: ",accounts);
+      //onsole.log("Acc: ", accounts);
       alert("Update account successfully!");
+      window.location.reload();
     } catch (error) {
       console.error("Failed to update account", error);
       if (error.response.data) alert(error.response.data.message);
@@ -250,9 +249,6 @@ const AddAccountForm = ({ onClose, onSubmit }) => {
 };
 
 const EditAccountForm = ({ account, onClose, onSubmit }) => {
-  // if (!account || !account._id) {
-  //   return <p>Error: No account data provided.</p>;
-  // }
   const [formData, setFormData] = useState({
     username: account.username,
     email: account.email,
