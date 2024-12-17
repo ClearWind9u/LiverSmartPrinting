@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import Modal from "./Modal";
 import axios from "axios";
+import NotificationModal from "./NotificationModal"; // Import the new NotificationModal component
 
 const AccountManagement = () => {
   const [accounts, setAccounts] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
   const [selectedAccount, setSelectedAccount] = useState(null);
+  const [notification, setNotification] = useState(null); // State for notification
 
   // Load danh sách tài khoản từ backend
   const fetchAccounts = async () => {
@@ -21,13 +23,23 @@ const AccountManagement = () => {
     fetchAccounts();
   }, []);
 
+  useEffect(() => {
+    if (!isModalOpen) {
+      fetchAccounts();
+    }
+  }, [isModalOpen]);
+
   // Xử lý thêm tài khoản
   const handleAddAccount = async (newAccount) => {
     try {
-      const response = await axios.post("http://localhost:5000/register", newAccount);
-      setAccounts((prev) => [...prev, response.data.newUser]);
+      const response = await axios.post(
+        "http://localhost:5000/register",
+        newAccount
+      );
+      // setAccounts((prev) => [...prev, response.data.newUser]);
+      fetchAccounts();
       setIsModalOpen(false);
-      alert("Create acccount successfully!");
+      setNotification("Create account successfully!"); // Set notification message
     } catch (error) {
       console.error("Failed to add account", error);
       if (error.response.data) alert(error.response.data.message);
@@ -38,14 +50,17 @@ const AccountManagement = () => {
   const handleUpdateAccount = async (updatedAccount) => {
     try {
       const response = await axios.put(
-        `http://localhost:5000/update/${selectedAccount._id}`, updatedAccount);
-      setAccounts((prev) =>
-        prev.map((acc) => (acc._id === selectedAccount._id ? response.data.updatedUser : acc))
+        `http://localhost:5000/update/${selectedAccount._id}`,
+        updatedAccount
       );
+      // setAccounts((prev) =>
+      //   prev.map((acc) =>
+      //     acc._id === selectedAccount._id ? response.data.updatedUser : acc
+      //   )
+      // );
       setIsModalOpen(false);
-      //onsole.log("Acc: ", accounts);
-      alert("Update account successfully!");
-      window.location.reload();
+      fetchAccounts();
+      setNotification("Update account successfully!"); // Set notification message
     } catch (error) {
       console.error("Failed to update account", error);
       if (error.response.data) alert(error.response.data.message);
@@ -56,9 +71,12 @@ const AccountManagement = () => {
   const handleDeleteAccount = async () => {
     try {
       await axios.delete(`http://localhost:5000/delete/${selectedAccount._id}`);
-      setAccounts((prev) => prev.filter((acc) => acc._id !== selectedAccount._id));
+      setAccounts((prev) =>
+        prev.filter((acc) => acc._id !== selectedAccount._id)
+      );
       setIsModalOpen(false);
-      alert("Delete account successfully!");
+      fetchAccounts();
+      setNotification("Delete account successfully!"); // Set notification message
     } catch (error) {
       console.error("Failed to delete account", error);
     }
@@ -80,10 +98,13 @@ const AccountManagement = () => {
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-3 text-gray-700">Account Management</h2>
+      <h2 className="text-2xl font-semibold mb-3 text-gray-700">
+        Account Management
+      </h2>
       <button
         className="px-4 py-2 bg-green-500 text-white rounded mb-3"
-        onClick={() => openModal("add")}>
+        onClick={() => openModal("add")}
+      >
         Add Account
       </button>
       <div className="overflow-x-auto max-h-[300px]">
@@ -108,12 +129,14 @@ const AccountManagement = () => {
                   <div className="flex justify-center space-x-2">
                     <button
                       className="px-2 py-1 mr-2 bg-blue-500 text-white rounded"
-                      onClick={() => openModal("edit", account)}>
+                      onClick={() => openModal("edit", account)}
+                    >
                       Edit
                     </button>
                     <button
                       className="px-2 py-1 bg-red-500 text-white rounded"
-                      onClick={() => openModal("delete", account)}>
+                      onClick={() => openModal("delete", account)}
+                    >
                       Delete
                     </button>
                   </div>
@@ -144,6 +167,12 @@ const AccountManagement = () => {
           )}
         </Modal>
       )}
+      {notification && (
+        <NotificationModal
+          message={notification}
+          onClose={() => setNotification(null)}
+        />
+      )}
     </div>
   );
 };
@@ -164,7 +193,13 @@ const AddAccountForm = ({ onClose, onSubmit }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword || !formData.role) {
+    if (
+      !formData.username ||
+      !formData.email ||
+      !formData.password ||
+      !formData.confirmPassword ||
+      !formData.role
+    ) {
       alert("All fields are required!");
       return;
     }
@@ -225,7 +260,8 @@ const AddAccountForm = ({ onClose, onSubmit }) => {
             name="role"
             value={formData.role}
             onChange={handleChange}
-            className="border rounded w-full p-2">
+            className="border rounded w-full p-2"
+          >
             <option value="admin">admin</option>
             <option value="user">user</option>
           </select>
@@ -234,12 +270,14 @@ const AddAccountForm = ({ onClose, onSubmit }) => {
           <button
             type="button"
             className="px-4 py-2 bg-gray-300 rounded mr-2"
-            onClick={onClose}>
+            onClick={onClose}
+          >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded">
+            className="px-4 py-2 bg-blue-500 text-white rounded"
+          >
             Add
           </button>
         </div>
@@ -346,13 +384,15 @@ const DeleteAccountConfirmation = ({ account, onClose, onConfirm }) => (
       <button
         type="button"
         className="px-4 py-2 bg-gray-300 rounded mr-2"
-        onClick={onClose}>
+        onClick={onClose}
+      >
         Cancel
       </button>
       <button
         type="button"
         className="px-4 py-2 bg-red-500 text-white rounded"
-        onClick={onConfirm}>
+        onClick={onConfirm}
+      >
         Delete
       </button>
     </div>
