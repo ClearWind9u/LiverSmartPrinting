@@ -2,15 +2,17 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
+import NotificationModal from "./NotificationModal"; // Import the new NotificationModal component
 import { loginSuccess } from "../redux/userSlice";
 
 const BuyPage = () => {
-  const [paperType, setPaperType] = useState("A4");
+  const [paperType, setPaperType] = useState("A4");  // Default to A4
   const [quantity, setQuantity] = useState(1);
-  const [price, setPrice] = useState(100); // Example price per sheet
+  const [price, setPrice] = useState(null);  // Example price per sheet
   const navigate = useNavigate();
   const [pagePrice, setPagePrice] = useState([]);
   const dispatch = useDispatch();
+  const [notification, setNotification] = useState(null); // State for notification
   const user = useSelector((state) => state.auth.login?.currentUser);
 
   useEffect(() => {
@@ -18,19 +20,26 @@ const BuyPage = () => {
       try {
         const response = await axios.get("http://localhost:5000/balance");
         if (response.data.success) {
-          // Ánh xạ dữ liệu từ API
           const pages = response.data.balancePages.map((page) => ({
-            id: `${page._id}`, // Tạo ID duy nhất
+            id: `${page._id}`,
             type: page.type,
             price: page.price,
           }));
           setPagePrice(pages);
+
+          // Set the default price for A4 paper when the data is loaded
+          const a4Page = pages.find(page => page.type === "A4");
+          if (a4Page) {
+            setPrice(a4Page.price);  // Set price to A4 paper's price
+          } else {
+            setNotification("A4 paper type not found in database.");
+          }
         } else {
-          setError("Failed to fetch payment logs");
+          setNotification("Failed to fetch paper prices.");
         }
       } catch (err) {
         console.error(err);
-        setError("An error occurred while fetching payment logs");
+        setNotification("An error occurred while fetching paper prices.");
       }
     };
 
@@ -58,11 +67,10 @@ const BuyPage = () => {
     }
     const totalPrice = price * quantity;
     if (user.wallet < totalPrice) {
-      alert('No');
+      alert('Not enough funds in wallet');
       return;
     }
     try {
-      // Gửi yêu cầu POST để tạo giao dịch mua
       const response = await axios.post("http://localhost:5000/pages/create", {
         type: paperType,
         quantity,
@@ -71,28 +79,22 @@ const BuyPage = () => {
       });
 
       if (response.data.success) {
-        // Gửi yêu cầu PUT để cập nhật balancePage
         const balanceUpdateResponse = await axios.put(`http://localhost:5000/update-balance/${user._id}`, {
-          pageSize: paperType, // Thêm loại giấy
-          changePage: Number(quantity), // Thêm số lượng trang
+          pageSize: paperType,
+          changePage: Number(quantity),
         });
-        const walletUpdateResponse = await axios.put(`http://localhost:5000/update-wallet/${user._id}`, { changeWallet: Number(totalPrice) * -1});
+        const walletUpdateResponse = await axios.put(`http://localhost:5000/update-wallet/${user._id}`, { changeWallet: Number(totalPrice) * -1 });
         if (balanceUpdateResponse.data.success && walletUpdateResponse.data.success) {
           const updateUser = {
             ...user,
-            wallet: user.wallet - Number(totalPrice)
-          }
+            wallet: user.wallet - Number(totalPrice),
+          };
           dispatch(loginSuccess(updateUser));
-          alert("Purchase successful! Balance updated.");
-        } else if (!walletUpdateResponse.data.success) {
-          console.error("Wallet update error:", walletUpdateResponse.data.message);
-          alert(`Purchase successful, but wallet update failed: ${walletUpdateResponse.data.message}`);
+          setNotification("Purchase successful! Balance updated.");
         } else {
-          console.error("Balance update error:", balanceUpdateResponse.data.message);
-          alert(`Purchase successful, but balance update failed: ${balanceUpdateResponse.data.message}`);
+          alert("Error updating balance or wallet.");
         }
       } else {
-        console.error("Purchase error:", response.data.message);
         alert(`Purchase failed: ${response.data.message}`);
       }
     } catch (error) {
@@ -111,7 +113,8 @@ const BuyPage = () => {
           <select
             value={paperType}
             onChange={handlePaperTypeChange}
-            className="border rounded w-full p-2">
+            className="border rounded w-full p-2"
+          >
             {pagePrice
               .slice() // Tạo bản sao mảng để tránh thay đổi mảng gốc
               .sort((a, b) => a.type.localeCompare(b.type)) // Sắp xếp theo tên
@@ -138,7 +141,7 @@ const BuyPage = () => {
           <label className="block font-medium mb-1">Price per sheet (VNĐ):</label>
           <input
             type="number"
-            value={`${price}`}
+            value={price || 0}  // Display 0 if price is not yet available
             readOnly
             className="border rounded w-full p-2 bg-gray-100"
           />
@@ -148,7 +151,7 @@ const BuyPage = () => {
           <label className="block font-medium mb-1">Total price (VNĐ):</label>
           <input
             type="number"
-            value={`${(price * quantity)}`}
+            value={price * quantity || 0}
             readOnly
             className="border rounded w-full p-2 bg-gray-100"
           />
@@ -158,16 +161,24 @@ const BuyPage = () => {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="px-4 py-2 bg-gray-300 rounded">
+            className="px-4 py-2 bg-gray-300 rounded"
+          >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded">
+            className="px-4 py-2 bg-blue-500 text-white rounded"
+          >
             Buy
           </button>
         </div>
       </form>
+      {notification && (
+        <NotificationModal
+          message={notification}
+          onClose={() => setNotification(null)}
+        />
+      )}
     </div>
   );
 };

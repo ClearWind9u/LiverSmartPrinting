@@ -128,4 +128,61 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+// Delete histories by printerId
+router.delete('/printer/:printerId', async (req, res) => {
+    const printerId = req.params.printerId;
+    try {
+        // Xóa tất cả lịch sử có printerId trùng khớp
+        const deletedHistories = await History.deleteMany({ printerId });
+
+        // Kiểm tra nếu không có lịch sử nào bị xóa
+        if (deletedHistories.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'No histories found for this printer to delete',
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Histories associated with printer deleted successfully',
+            deletedCount: deletedHistories.deletedCount,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+        });
+    }
+});
+
+// Delete histories by userId
+router.delete('/user/:userId', async (req, res) => {
+    const userId = req.params.userId;
+    try {
+        // Xóa tất cả lịch sử có userId trùng khớp
+        const deletedHistories = await History.deleteMany({ userId });
+
+        // Kiểm tra nếu không có lịch sử nào bị xóa
+        if (deletedHistories.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'No histories found for this user to delete',
+            });
+        }
+        res.json({
+            success: true,
+            message: 'Histories associated with user deleted successfully',
+            deletedCount: deletedHistories.deletedCount,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+        });
+    }
+});
+
 export default router;

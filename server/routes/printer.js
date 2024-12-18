@@ -50,20 +50,25 @@ router.post('/create', async (req, res) => {
     }
 });
 
-//Update a printer
+// Update a printer
 router.put('/:id', async (req, res) => {
-    const { name, price, type, image, information } = req.body
+    const { name, price, type, image, information, status } = req.body;
     try {
         let updatedPrinter = { name, price, type, image, information };
+        // Nếu status được truyền vào thì cập nhật status, nếu không thì giữ nguyên status cũ
+        if (status !== undefined) {
+            updatedPrinter.status = status;
+        }
         const postUpdateCondition = { _id: req.params.id };
         updatedPrinter = await Printer.findOneAndUpdate(postUpdateCondition, updatedPrinter, { new: true });
-        //User not authorised to update printer
-        if (!updatedPrinter)
-            return res.status(401).json({ success: false, message: 'Printer not found or user not authorise' })
-        res.json({ success: true, message: 'Update successfull!', updatedPrinter });
+        // Nếu không tìm thấy máy in
+        if (!updatedPrinter) {
+            return res.status(401).json({ success: false, message: 'Printer not found or user not authorized' });
+        }
+        res.json({ success: true, message: 'Update successful!', updatedPrinter });
     } catch (error) {
         console.log(error);
-        res.status(500).json({ success: false, message: 'Internal server error' })
+        res.status(500).json({ success: false, message: 'Internal server error' });
     }
 });
 

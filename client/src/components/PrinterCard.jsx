@@ -1,12 +1,12 @@
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 
 const PrinterCard = ({ printer, userRole }) => {
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // State để kiểm soát modal xác nhận xóa
-  const [isEnabled, setIsEnabled] = useState(true);
+  const [isEnabled, setIsEnabled] = useState(printer.status === "Enable");
   const [printerName, setPrinterName] = useState(printer.name);
   const [type, setType] = useState(printer.type || "");
   const [price, setPrice] = useState(printer.price || "");
@@ -19,7 +19,6 @@ const PrinterCard = ({ printer, userRole }) => {
   const handleInfoModalClose = () => setIsInfoModalOpen(false);
   const handleEditModalOpen = () => setIsEditModalOpen(true);
   const handleEditModalClose = () => setIsEditModalOpen(false);
-  const handleToggle = () => setIsEnabled(!isEnabled);
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -71,16 +70,42 @@ const PrinterCard = ({ printer, userRole }) => {
 
   const deletePrinter = async () => {
     try {
+      // Xóa máy in
       const response = await axios.delete(`http://localhost:5000/printers/${printer._id}`);
       if (response.status === 200) {
-        alert("Printer deleted successfully!");
-        setIsDeleteModalOpen(false); // Close the delete modal
+        // Gọi API xóa lịch sử in theo printerId
+        const historyResponse = await axios.delete(`http://localhost:5000/histories/printer/${printer._id}`);
+        if (historyResponse.status === 200) {
+          alert("Printer and related history deleted successfully!");
+        } else {
+          alert(historyResponse.data.message || "Failed to delete history.");
+        }
+        setIsDeleteModalOpen(false); // Đóng modal xác nhận xóa
       } else {
         alert(response.data.message || "Failed to delete printer.");
       }
     } catch (error) {
       console.error("Error deleting printer:", error);
       alert(error.response?.data?.message || "An error occurred while deleting.");
+    }
+  };
+
+  const handleToggleStatus = async () => {
+    const newStatus = isEnabled ? "Disable" : "Enable"; // Đảo trạng thái
+    try {
+      const response = await axios.put(`http://localhost:5000/printers/${printer._id}`, {
+        status: newStatus, // Gửi trạng thái mới
+      });
+
+      if (response.status === 200) {
+        alert(`Printer ${newStatus === "Enable" ? "enabled" : "disabled"} successfully!`);
+        setIsEnabled(!isEnabled); // Cập nhật trạng thái trong UI
+      } else {
+        alert("Failed to update printer status.");
+      }
+    } catch (error) {
+      console.error("Error updating printer status:", error);
+      alert("An error occurred while updating the printer status.");
     }
   };
 
@@ -96,21 +121,32 @@ const PrinterCard = ({ printer, userRole }) => {
   }, [selectedImage]);
 
   return (
-    <div className="w-[300px] h-[320px] bg-white border-gray-300 border-2 rounded-xl flex flex-col items-center">
-      <h3 className="text-[20px] font-semibold mt-4">{printer.name}</h3>
+    <div className={`w-[300px] h-[320px] border-gray-300 border-2 rounded-xl flex flex-col items-center ${isEnabled ? "bg-white" : "bg-gray-400"}`}>
+      <h3 className={`text-[20px] font-semibold mt-4 ${isEnabled ? "text-black" : "text-gray-700"}`}>
+        {printer.name}
+      </h3>
       <img
-        src={selectedImage || printer.image} // Use the selected image or fallback to the default printer image
+        src={selectedImage || printer.image}
         alt="Printer"
         className="w-[300px] h-[200px] object-cover"
+        style={{ filter: isEnabled ? "none" : "grayscale(100%)" }} // Apply grayscale if disabled
       />
       {userRole === "user" && (
         <div className="flex justify-between items-center w-5/6 pt-4">
-          <Link
-            to={`/printer/${printer._id}`}
-            className="bg-[#f05258] text-white text-center px-4 py-1 rounded-full w-[120px]"
-          >
-            Select
-          </Link>
+          {isEnabled ? (
+            <Link
+              to={`/printer/${printer._id}`}
+              className="bg-[#f05258] text-white text-center px-4 py-1 rounded-full w-[120px]"
+            >
+              Select
+            </Link>
+          ) : (
+            <span
+              className="bg-[#f05258] text-white text-center px-4 py-1 rounded-full w-[120px] cursor-not-allowed"
+            >
+              Select
+            </span>
+          )}
           <button
             className="bg-[#1f89db] text-white text-center px-4 py-1 rounded-full w-[120px]"
             onClick={handleInfoModalOpen}
@@ -135,7 +171,7 @@ const PrinterCard = ({ printer, userRole }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg w-[400px] shadow-lg">
             <button
-              className="text-bold absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+              className="text-bold absolute text-gray-500 hover:text-gray-700"
               onClick={handleInfoModalClose}
             >
               x
@@ -162,15 +198,14 @@ const PrinterCard = ({ printer, userRole }) => {
                       type="checkbox"
                       className="sr-only"
                       checked={isEnabled}
-                      onChange={handleToggle}
+                      onChange={handleToggleStatus} // Gọi hàm xử lý thay đổi trạng thái
                     />
                     <div
-                      className={`block w-14 h-6 rounded-full ${isEnabled ? "bg-green-500" : "bg-gray-600"
-                        }`} style={{ height: "35px" }}
+                      className={`block w-14 h-6 rounded-full ${isEnabled ? "bg-green-500" : "bg-gray-600"}`}
+                      style={{ height: "35px" }}
                     ></div>
                     <div
-                      className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${isEnabled ? "transform translate-x-full bg-green-500" : ""
-                        }`}
+                      className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${isEnabled ? "transform translate-x-full bg-green-500" : ""}`}
                     />
                   </div>
                   <div className="ml-3 text-gray-600 font-medium">

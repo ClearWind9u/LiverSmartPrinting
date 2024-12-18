@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import NotificationModal from "./NotificationModal"; // Import the new NotificationModal component
 
 const ConfigPage = () => {
   const [editingIndex, setEditingIndex] = useState(null);
@@ -7,6 +8,7 @@ const ConfigPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newPaper, setNewPaper] = useState({ type: "", price: "1", balance: "0" });
   const [originalPaper, setOriginalPaper] = useState(null);
+  const [notification, setNotification] = useState(null); // State for notification
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(false); // Modal xác nhận xóa
   const [paperToDelete, setPaperToDelete] = useState(null); // Loại giấy cần xóa
 
@@ -38,15 +40,15 @@ const ConfigPage = () => {
         setPaperTypes([...paperTypes, response.data.balancePage]);
         setNewPaper({ type: "", price: "1", balance: "0" });
         setIsModalOpen(false);
-        alert("Paper type added successfully!");
+        setNotification("Paper type added successfully!");
       } else {
-        alert("Failed to add paper type.");
+        alert(response.data.message || "Failed to add paper type.");
       }
     } catch (error) {
       console.error("Error adding paper type:", error);
-      alert("An error occurred while adding paper type.");
+      alert(error.response?.data?.message || "An error occurred while adding paper type.");
     }
-  };
+  };  
 
   // Cập nhật
   const handleSave = async (index) => {
@@ -59,16 +61,16 @@ const ConfigPage = () => {
       const response = await axios.put(`http://localhost:5000/balance/${currentRow._id}`, currentRow);
       if (response.data.success) {
         setEditingIndex(null);
-        setOriginalPaper(null);  // Xóa giá trị gốc khi lưu thành công
-        alert("Paper type updated successfully!");
+        setOriginalPaper(null);
+        setNotification("Paper type updated successfully!");
       } else {
-        alert("Failed to update paper type.");
+        alert(response.data.message || "Failed to update paper type.");
       }
     } catch (error) {
       console.error("Error updating paper type:", error);
-      alert("An error occurred while updating paper type.");
+      alert(error.response?.data?.message || "An error occurred while updating paper type.");
     }
-  };
+  };  
 
   // Chỉnh sửa trạng thái
   const handleEditToggle = (index) => {
@@ -87,17 +89,17 @@ const ConfigPage = () => {
       const response = await axios.delete(`http://localhost:5000/balance/${paperToDelete._id}`);
       if (response.data.success) {
         setPaperTypes(paperTypes.filter((paper) => paper._id !== paperToDelete._id));
-        setConfirmDeleteModal(false); // Đóng modal sau khi xóa thành công
-        setPaperToDelete(null); // Reset paperToDelete
-        alert("Paper type deleted successfully!");
+        setConfirmDeleteModal(false);
+        setPaperToDelete(null);
+        setNotification("Paper type deleted successfully!");
       } else {
-        alert("Failed to delete paper type.");
+        alert(response.data.message || "Failed to delete paper type.");
       }
     } catch (error) {
       console.error("Error deleting paper type:", error);
-      alert("An error occurred while deleting paper type.");
+      alert(error.response?.data?.message || "An error occurred while deleting paper type.");
     }
-  };
+  };  
 
   // Đóng modal xác nhận
   const closeConfirmDeleteModal = () => {
@@ -169,8 +171,15 @@ const ConfigPage = () => {
                             Save
                           </button>
                           <button
-                            className="px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-600"
-                            onClick={() => setEditingIndex(null)}
+                            className="px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-700"
+                            onClick={() => {
+                              // Khôi phục dữ liệu từ originalPaper
+                              const updatedPaperTypes = [...paperTypes];
+                              updatedPaperTypes[editingIndex] = originalPaper; // Khôi phục dữ liệu gốc
+                              setPaperTypes(updatedPaperTypes);
+                              setEditingIndex(null); // Thoát chế độ chỉnh sửa
+                              setOriginalPaper(null); // Xóa giá trị gốc đã lưu
+                            }}
                           >
                             Cancel
                           </button>
@@ -280,6 +289,12 @@ const ConfigPage = () => {
             </div>
           </div>
         </div>
+      )}
+      {notification && (
+        <NotificationModal
+          message={notification}
+          onClose={() => setNotification(null)}
+        />
       )}
     </div>
   );

@@ -13,7 +13,7 @@ const StudentPaymentLog = ({ userId }) => {
   useEffect(() => {
     const fetchPaymentLogs = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/pages/${user._id}`);
+        const response = await axios.get(`http://localhost:5000/pages/user/${user._id}`);
         if (response.data.success) {
           // Map dữ liệu API thành dữ liệu hiển thị
           const logs = response.data.buypage.map((log) => ({

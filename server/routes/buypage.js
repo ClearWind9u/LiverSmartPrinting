@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
 });
 
 // View buypage by userId
-router.get('/:userId', async (req, res) => {
+router.get('/user/:userId', async (req, res) => {
     const userId = req.params.userId;
     try {
         // Tìm lịch sử theo userId
@@ -67,6 +67,60 @@ router.post('/create', async (req, res) => {
             success: true,
             message: 'Create success',
             history: newBuyPage,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+        });
+    }
+});
+
+// Delete a buypage by its ID
+router.delete('/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const deletedBuyPage = await BuyPage.findByIdAndDelete(id);
+        if (!deletedBuyPage) {
+            return res.status(404).json({
+                success: false,
+                message: 'BuyPage not found',
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'BuyPage deleted successfully',
+            deletedBuyPage,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+        });
+    }
+});
+
+// Delete all buypages by userId
+router.delete('/user/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const deletedBuyPages = await BuyPage.deleteMany({ userId });
+        if (deletedBuyPages.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'No BuyPages found for this user',
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'All BuyPages for the user deleted successfully',
+            deletedCount: deletedBuyPages.deletedCount,
         });
     } catch (error) {
         console.error(error);

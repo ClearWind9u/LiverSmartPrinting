@@ -17,6 +17,7 @@ const PrinterForm = () => {
   const [printSides, setPrintSides] = useState("one");
   const [balancePage, setBalancePage] = useState(0);
   const user = useSelector((state) => state.auth.login?.currentUser);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPrinter = async () => {
@@ -58,34 +59,33 @@ const PrinterForm = () => {
 
   const handlePrint = async (e) => {
     e.preventDefault();
-
     if (!file) {
       alert("No file selected. Please upload a file before printing.");
       return;
     }
-
+    
     if (copies <= 0) {
       alert("Number of copies must be greater than 0.");
       return;
     }
-
+    
     if (balancePage < copies) {
       alert(`Insufficient balance for ${pageSize} paper. Please add more pages.`);
       return;
     }
-
+    
     try {
       // Gửi yêu cầu trừ số dư trang
       const updateBalanceResponse = await axios.put(`http://localhost:5000/update-balance/${user._id}`, {
         pageSize,
         changePage: -copies, // Số trang cần trừ
       });
-
+      
       if (!updateBalanceResponse.data.success) {
         alert("Failed to update page balance. Please try again.");
         return;
       }
-
+      
       // Tạo dữ liệu in
       const printData = {
         fileName: file.name,
@@ -98,7 +98,7 @@ const PrinterForm = () => {
         userId: user._id,
         printerId: id,
       };
-
+      
       const response = await axios.post("http://localhost:5000/histories/create", printData, {
         headers: { "Content-Type": "application/json" },
       });
@@ -114,7 +114,7 @@ const PrinterForm = () => {
       alert("An error occurred while processing the print job.");
     }
   };
-
+  
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
@@ -126,7 +126,7 @@ const PrinterForm = () => {
   return (
     <form className="bg-gray-200 p-4 rounded shadow-lg w-3/4 mx-auto mt-4"
       style={{ marginTop: '80px' }}
-    >
+      onSubmit={handlePrint}>
       <h2 className="text-lg font-semibold mb-2 text-center">{printer.name}</h2>
 
       {/* File Upload */}

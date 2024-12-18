@@ -1,6 +1,6 @@
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import axios from "axios";
 
 const Profile = () => {
     const currentUser = useSelector((state) => state.auth.login?.currentUser);
@@ -33,8 +33,15 @@ const Profile = () => {
     if (loading) return <div>Loading...</div>;
     if (error) return <div className="text-red-500">{error}</div>;
 
+    // Sắp xếp balancePage theo type
+    const sortedBalancePage = user.balancePage?.sort((a, b) => {
+        if (a.type < b.type) return -1;
+        if (a.type > b.type) return 1;
+        return 0;
+    });
+
     return (
-        <div className="pt-[190px] h-full w-full" style={{ height: "750px" }}>
+        <div className="pt-[110px] h-full w-full" style={{ height: "750px" }}>
             <div className="w-3/4 h-5/6 mx-auto mt-6 bg-white p-8 rounded-lg shadow-lg flex">
                 <div className="w-1/2 pr-4">
                     <h1 className="text-left text-3xl font-bold mb-8 text-gray-700">User Profile</h1>
@@ -65,16 +72,16 @@ const Profile = () => {
                 </div>
 
                 <div className="w-1/2 pl-4">
-                    <h2 className="text-center text-3xl font-bold mb-8 text-gray-700">Page Balance</h2>
+                    <h2 className="text-left text-3xl font-bold mb-8 text-gray-700">Page Balance</h2>
                     <table className="w-full border border-gray-300">
                         <thead>
                             <tr className="bg-gray-100">
                                 <th className="py-2 px-4 border-b text-2xl text-left text-gray-700">Type</th>
-                                <th className="py-2 px-4 border-b  text-2xl text-left text-gray-700">Number</th>
+                                <th className="py-2 px-4 border-b text-2xl text-left text-gray-700">Number</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {user.balancePage.map((balance, index) => (
+                            {sortedBalancePage?.map((balance, index) => (
                                 <tr key={index}>
                                     <td className="py-3 px-4 border-b text-2xl font-bold text-gray-700">{balance.type}</td>
                                     <td className="py-3 px-4 border-b text-2xl text-gray-900">{balance.balance}</td>

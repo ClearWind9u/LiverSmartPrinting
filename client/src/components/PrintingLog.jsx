@@ -113,7 +113,7 @@ const PrintingLog = () => {
                 User Name <SwapVertIcon />
               </th>
               <th
-                className="py-3 px-7 border-b text-left cursor-pointer"
+                className="py-3 px-6 border-b text-left cursor-pointer"
                 onClick={() => handleSort("printerName")}
               >
                 Printer Name <SwapVertIcon />

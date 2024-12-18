@@ -10,6 +10,7 @@ import ArticleIcon from "@mui/icons-material/Article";
 import PersonIcon from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
 import AssessmentIcon from "@mui/icons-material/Assessment";
+import NotificationModal from "./NotificationModal"; // Import the new NotificationModal component
 
 const Header = ({ role }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -17,7 +18,9 @@ const Header = ({ role }) => {
   const [step, setStep] = useState(1); // Bước 1: Nhập số tiền, Bước 2: Hiển thị mã QR
   const [amount, setAmount] = useState(""); // Số tiền người dùng nhập
   const dispatch = useDispatch();
+  const [notification, setNotification] = useState(null); // State for notification
   const user = useSelector((state) => state.auth.login?.currentUser);
+
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
@@ -27,18 +30,13 @@ const Header = ({ role }) => {
     setStep(1); // Quay lại bước nhập số tiền
   };
 
-  // Hàm định dạng số tiền
-  // const formatAmount = (value) => {
-  //   // Loại bỏ các ký tự không phải số
-  //   const numericValue = value.replace(/\D/g, "");
-  //   // Thêm dấu chấm sau mỗi 3 chữ số
-  //   return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  // };
-
   const handleAmountChange = (e) => {
     setAmount(e.target.value);
   };
-
+  if (!/^\d*\.?\d*$/.test(amount)) { // Kiểm tra xem giá trị có phải là số hợp lệ
+    alert("Please enter a valid number.");
+    setAmount("");
+  }
   const handleAddBalance = async () => {
     try {
       const response = await axios.put(
@@ -51,7 +49,7 @@ const Header = ({ role }) => {
           wallet: user.wallet + Number(amount),
         };
         dispatch(loginSuccess(updateUser));
-        alert(`Add ${amount} VNĐ successfully!`);
+        setNotification(`Add ${amount} VNĐ successfully!`);
         setAmount("");
       }
     } catch (error) {
@@ -80,7 +78,7 @@ const Header = ({ role }) => {
             <li>
               <Link
                 to="/"
-                className="flex items-center gap-2 hover:text-gray-700"
+                className="flex items-center gap-2 hover:text-gray-700 active:text-yellow-500 focus:text-yellow-500"
               >
                 <HomeIcon className="h-6 w-6" />
                 <span>Home</span>
@@ -91,7 +89,7 @@ const Header = ({ role }) => {
                 <li>
                   <Link
                     to="/printers"
-                    className="flex items-center gap-2 hover:text-gray-700"
+                    className="flex items-center gap-2 hover:text-gray-700 active:text-yellow-500 focus:text-yellow-500"
                   >
                     <PrintIcon className="h-6 w-6" />
                     <span>Manage Printers</span>
@@ -100,7 +98,7 @@ const Header = ({ role }) => {
                 <li>
                   <Link
                     to="/configuration"
-                    className="flex items-center gap-2 hover:text-gray-700"
+                    className="flex items-center gap-2 hover:text-gray-700 active:text-yellow-500 focus:text-yellow-500"
                   >
                     <SettingsIcon className="h-6 w-6" />
                     <span>Configuration</span>
@@ -109,7 +107,7 @@ const Header = ({ role }) => {
                 <li>
                   <Link
                     to="/report"
-                    className="flex items-center gap-2 hover:text-gray-700"
+                    className="flex items-center gap-2 hover:text-gray-700 active:text-yellow-500 focus:text-yellow-500"
                   >
                     <AssessmentIcon className="h-6 w-6" />
                     <span>Report</span>
@@ -121,7 +119,7 @@ const Header = ({ role }) => {
                 <li>
                   <Link
                     to="/printers"
-                    className="flex items-center gap-2 hover:text-gray-700"
+                    className="flex items-center gap-2 hover:text-gray-700 active:text-yellow-500 focus:text-yellow-500"
                   >
                     <PrintIcon className="h-6 w-6" />
                     <span>View Printers</span>
@@ -130,7 +128,7 @@ const Header = ({ role }) => {
                 <li>
                   <Link
                     to="/pages"
-                    className="flex items-center gap-2 hover:text-gray-700"
+                    className="flex items-center gap-2 hover:text-gray-700 active:text-yellow-500 focus:text-yellow-500"
                   >
                     <ArticleIcon className="h-6 w-6" />
                     <span>Buy Pages</span>
@@ -223,6 +221,12 @@ const Header = ({ role }) => {
               Close
             </button>
           </div>
+          {notification && (
+            <NotificationModal
+              message={notification}
+              onClose={() => setNotification(null)}
+            />
+          )}
         </div>
       )}
     </>

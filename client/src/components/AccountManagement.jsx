@@ -53,11 +53,6 @@ const AccountManagement = () => {
         `http://localhost:5000/update/${selectedAccount._id}`,
         updatedAccount
       );
-      // setAccounts((prev) =>
-      //   prev.map((acc) =>
-      //     acc._id === selectedAccount._id ? response.data.updatedUser : acc
-      //   )
-      // );
       setIsModalOpen(false);
       fetchAccounts();
       setNotification("Update account successfully!"); // Set notification message
@@ -71,6 +66,12 @@ const AccountManagement = () => {
   const handleDeleteAccount = async () => {
     try {
       await axios.delete(`http://localhost:5000/delete/${selectedAccount._id}`);
+      if (selectedAccount.role === "user") {
+      // Gọi API xóa lịch sử in theo userId
+      await axios.delete(`http://localhost:5000/histories/user/${selectedAccount._id}`);
+      // Gọi API xóa lịch sử mua trang in theo userId
+      await axios.delete(`http://localhost:5000/pages/user/${selectedAccount._id}`);
+      };
       setAccounts((prev) =>
         prev.filter((acc) => acc._id !== selectedAccount._id)
       );
@@ -78,19 +79,20 @@ const AccountManagement = () => {
       fetchAccounts();
       setNotification("Delete account successfully!"); // Set notification message
     } catch (error) {
-      console.error("Failed to delete account", error);
+      console.error("Failed to delete account and histories (print and buy page)", error);
+      if (error.response && error.response.data) {
+        alert(error.response.data.message);
+      };
     }
   };
 
   const openModal = (content, account = null) => {
-    console.log("Opening modal with account: ", account);
     setModalContent(content);
     setSelectedAccount(account);
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
-    console.log("Acc2: ", accounts);
     setIsModalOpen(false);
     setModalContent(null);
     setSelectedAccount(null);

@@ -33,8 +33,7 @@ const PrinterGrid = ({ role }) => {
         <div className="mb-4">
           <Link
             to="/add-printer"
-            className="bg-[#f05258] text-white px-4 py-2 rounded-full"
-          >
+            className="bg-[#f05258] text-white px-4 py-2 rounded-full">
             Add Printer
           </Link>
         </div>

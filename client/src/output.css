@@ -1239,6 +1239,11 @@ video {
   padding-top: 190px;
 }
 
+.pt-\[110px\] {
+  padding-top: 110px;
+}
+
+
 .pt-\[200px\] {
   padding-top: 200px;
 }
@@ -1367,6 +1372,11 @@ video {
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
 }
 
+.text-yellow-500 {
+  --tw-text-opacity: 1;
+  color: rgb(253 230 138 / var(--tw-text-opacity, 1));
+}
+
 .underline {
   text-decoration-line: underline;
 }
@@ -1455,6 +1465,20 @@ video {
 
 .hover\:opacity-90:hover {
   opacity: 0.9;
+}
+.hover\:text-yellow-500:hover {
+  --tw-text-opacity: 1;
+  color: rgb(253 230 138 / var(--tw-text-opacity, 1));
+}
+
+.focus\:text-yellow-500:focus {
+  --tw-text-opacity: 1;
+  color: rgb(253 230 138 / var(--tw-text-opacity, 1));
+}
+
+.active\:text-yellow-500:active {
+  --tw-text-opacity: 1;
+  color: rgb(253 230 138 / var(--tw-text-opacity, 1));
 }
 
 .focus\:border-blue-300:focus {
