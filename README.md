@@ -70,18 +70,7 @@
 
 ```env
 MONGO_URL="mongodb+srv://phamthanhphong9u:12345@smart-printer.6q96r.mongodb.net/ssps?retryWrites=true&w=majority"
-
-## Các lệnh hữu ích
-
-- **Chạy Server (Backend)**:
-    ```bash
-    npm run server
-    ```
-
-- **Chạy Client (Frontend)**:
-    ```bash
-    npm run dev
-    ```
+```
 
 ## Cảm ơn bạn đã sử dụng LiverSmartPrinting!
 
