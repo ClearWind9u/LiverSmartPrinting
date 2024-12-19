@@ -338,7 +338,7 @@ const EditAccountForm = ({ account, onClose, onSubmit }) => {
             className="border rounded w-full p-2"
           />
         </div>
-        <div className="mb-4">
+        {/* <div className="mb-4">
           <label className="block font-medium mb-1">Password (Optional):</label>
           <input
             type="password"
@@ -357,7 +357,7 @@ const EditAccountForm = ({ account, onClose, onSubmit }) => {
             onChange={handleChange}
             className="border rounded w-full p-2"
           />
-        </div>
+        </div> */}
         <div className="flex justify-end">
           <button
             type="button"
