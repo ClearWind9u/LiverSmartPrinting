@@ -64,7 +64,12 @@
 
 ### 4. Cấu hình database
 
-Nếu bạn sử dụng MongoDB cục bộ, đảm bảo rằng MongoDB đang chạy trên máy của bạn. Nếu sử dụng MongoDB Atlas, hãy thay đổi cấu hình trong file `server/config/database.js` để kết nối tới database của bạn.
+Để truy cập vào database MongoDB, bạn cần phải tạo một file `.env` trong thư mục **server** với nội dung kết nối tới MongoDB Atlas hoặc MongoDB cục bộ.
+
+**File `.env` ví dụ**:
+
+```env
+MONGO_URL="mongodb+srv://phamthanhphong9u:12345@smart-printer.6q96r.mongodb.net/ssps?retryWrites=true&w=majority"
 
 ## Các lệnh hữu ích
 
