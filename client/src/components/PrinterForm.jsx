@@ -118,10 +118,17 @@ const PrinterForm = () => {
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
+      // Kiểm tra loại file (chỉ cho phép file PDF hoặc các định dạng hình ảnh)
+      const allowedTypes = ["application/pdf", "image/jpeg", "image/png", "image/gif"];
+      if (!allowedTypes.includes(selectedFile.type)) {
+        alert("Invalid file type. Please upload a PDF or an image file.");
+        return; // Không xử lý tiếp nếu file không hợp lệ
+      }
+  
       setFile(selectedFile);
       setFilePreviewUrl(URL.createObjectURL(selectedFile)); // Tạo URL xem trước file
     }
-  };
+  };  
 
   return (
     <form className="bg-gray-200 p-4 rounded shadow-lg w-3/4 mx-auto mt-4"
