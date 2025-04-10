@@ -9,7 +9,7 @@ const LoginForm = () => {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const dispatch = useDispatch();
-  const API_URL = process.env.REACT_APP_API_URL;
+  const API_URL = 'https://liver-smart-printing-bf56.vercel.app';
 
   const handleSubmit = async (e) => {
     e.preventDefault();

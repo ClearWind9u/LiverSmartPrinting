@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import PrintingLog from "./PrintingLog";
-import PaymentLog from "./PaymentLog";
 import AccountManagement from "./AccountManagement";
+import PaymentLog from "./PaymentLog";
+import PrintingLog from "./PrintingLog";
 
 const ReportPage = () => {
   const [activeTab, setActiveTab] = useState("printing");
-  const API_URL = process.env.REACT_APP_API_URL;
+  const API_URL = 'https://liver-smart-printing-bf56.vercel.app';
 
   return (
     <div className="pt-16 w-full h-fit">

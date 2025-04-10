@@ -11,7 +11,7 @@ const ConfigPage = () => {
   const [notification, setNotification] = useState(null); // State for notification
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(false); // Modal xác nhận xóa
   const [paperToDelete, setPaperToDelete] = useState(null); // Loại giấy cần xóa
-  const API_URL = process.env.REACT_APP_API_URL;
+  const API_URL = 'https://liver-smart-printing-bf56.vercel.app';
 
   // Lấy danh sách từ API
   const fetchPaperTypes = async () => {

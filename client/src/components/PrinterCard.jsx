@@ -14,7 +14,7 @@ const PrinterCard = ({ printer, userRole }) => {
   const [selectedImage, setSelectedImage] = useState(printer.image || null);
   const [file, setFile] = useState(null);
   const [error, setError] = useState("");
-  const API_URL = process.env.REACT_APP_API_URL;
+  const API_URL = 'https://liver-smart-printing-bf56.vercel.app';
 
   const handleInfoModalOpen = () => setIsInfoModalOpen(true);
   const handleInfoModalClose = () => setIsInfoModalOpen(false);

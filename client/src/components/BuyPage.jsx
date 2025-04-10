@@ -14,7 +14,7 @@ const BuyPage = () => {
   const dispatch = useDispatch();
   const [notification, setNotification] = useState(null); // State for notification
   const user = useSelector((state) => state.auth.login?.currentUser);
-  const API_URL = process.env.REACT_APP_API_URL;
+  const API_URL = 'https://liver-smart-printing-bf56.vercel.app';
 
   useEffect(() => {
     const fetchPagePrice = async () => {

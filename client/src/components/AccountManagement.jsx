@@ -9,7 +9,7 @@ const AccountManagement = () => {
   const [modalContent, setModalContent] = useState(null);
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [notification, setNotification] = useState(null); // State for notification
-  const API_URL = process.env.REACT_APP_API_URL;
+  const API_URL = 'https://liver-smart-printing-bf56.vercel.app';
 
   // Load danh sách tài khoản từ backend
   const fetchAccounts = async () => {

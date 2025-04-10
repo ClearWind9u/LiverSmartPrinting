@@ -9,7 +9,7 @@ const StudentPaymentLog = ({ userId }) => {
   const [error, setError] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const user = useSelector((state) => state.auth.login?.currentUser);
-  const API_URL = process.env.REACT_APP_API_URL;
+  const API_URL = 'https://liver-smart-printing-bf56.vercel.app';
 
   useEffect(() => {
     const fetchPaymentLogs = async () => {

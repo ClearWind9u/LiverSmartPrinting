@@ -11,7 +11,7 @@ const AddPrinterForm = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [error, setError] = useState("");
   const navigate = useNavigate(); // Khởi tạo useNavigate
-  const API_URL = process.env.REACT_APP_API_URL;
+  const API_URL = 'https://liver-smart-printing-bf56.vercel.app';
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];

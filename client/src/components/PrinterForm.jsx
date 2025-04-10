@@ -18,7 +18,7 @@ const PrinterForm = () => {
   const [balancePage, setBalancePage] = useState(0);
   const user = useSelector((state) => state.auth.login?.currentUser);
   const navigate = useNavigate();
-  const API_URL = process.env.REACT_APP_API_URL;
+  const API_URL = 'https://liver-smart-printing-bf56.vercel.app';
 
   useEffect(() => {
     const fetchPrinter = async () => {
