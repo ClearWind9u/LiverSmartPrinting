@@ -5,6 +5,7 @@ import AccountManagement from "./AccountManagement";
 
 const ReportPage = () => {
   const [activeTab, setActiveTab] = useState("printing");
+  const API_URL = process.env.REACT_APP_API_URL;
 
   return (
     <div className="pt-16 w-full h-fit">

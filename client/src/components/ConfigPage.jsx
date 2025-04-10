@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
 import axios from "axios";
+import React, { useEffect, useState } from "react";
 import NotificationModal from "./NotificationModal"; // Import the new NotificationModal component
 
 const ConfigPage = () => {
@@ -11,11 +11,12 @@ const ConfigPage = () => {
   const [notification, setNotification] = useState(null); // State for notification
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(false); // Modal xác nhận xóa
   const [paperToDelete, setPaperToDelete] = useState(null); // Loại giấy cần xóa
+  const API_URL = process.env.REACT_APP_API_URL;
 
   // Lấy danh sách từ API
   const fetchPaperTypes = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/balance");
+      const response = await axios.get(`${API_URL}/balance`);
       if (response.data.success) {
         setPaperTypes(response.data.balancePages);
       }
@@ -35,7 +36,7 @@ const ConfigPage = () => {
         alert("Please fill in all fields.");
         return;
       }
-      const response = await axios.post("http://localhost:5000/balance/create", newPaper);
+      const response = await axios.post(`${API_URL}/balance/create`, newPaper);
       if (response.data.success) {
         setPaperTypes([...paperTypes, response.data.balancePage]);
         setNewPaper({ type: "", price: "1", balance: "0" });
@@ -58,7 +59,7 @@ const ConfigPage = () => {
         alert("Please fill in all fields before saving.");
         return;
       }
-      const response = await axios.put(`http://localhost:5000/balance/${currentRow._id}`, currentRow);
+      const response = await axios.put(`${API_URL}/balance/${currentRow._id}`, currentRow);
       if (response.data.success) {
         setEditingIndex(null);
         setOriginalPaper(null);
@@ -86,7 +87,7 @@ const ConfigPage = () => {
   // Xóa (Chỉ thực hiện sau khi xác nhận)
   const handleDeletePaperType = async () => {
     try {
-      const response = await axios.delete(`http://localhost:5000/balance/${paperToDelete._id}`);
+      const response = await axios.delete(`${API_URL}/balance/${paperToDelete._id}`);
       if (response.data.success) {
         setPaperTypes(paperTypes.filter((paper) => paper._id !== paperToDelete._id));
         setConfirmDeleteModal(false);

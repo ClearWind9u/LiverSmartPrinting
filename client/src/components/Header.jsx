@@ -1,15 +1,15 @@
+import ArticleIcon from "@mui/icons-material/Article";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import HomeIcon from "@mui/icons-material/Home";
+import PersonIcon from "@mui/icons-material/Person";
+import PrintIcon from "@mui/icons-material/Print";
+import SettingsIcon from "@mui/icons-material/Settings";
+import axios from "axios";
 import * as React from "react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { loginSuccess } from "../redux/userSlice";
-import axios from "axios";
-import HomeIcon from "@mui/icons-material/Home";
-import PrintIcon from "@mui/icons-material/Print";
-import ArticleIcon from "@mui/icons-material/Article";
-import PersonIcon from "@mui/icons-material/Person";
-import SettingsIcon from "@mui/icons-material/Settings";
-import AssessmentIcon from "@mui/icons-material/Assessment";
 import NotificationModal from "./NotificationModal"; // Import the new NotificationModal component
 
 const Header = ({ role }) => {
@@ -20,7 +20,7 @@ const Header = ({ role }) => {
   const dispatch = useDispatch();
   const [notification, setNotification] = useState(null); // State for notification
   const user = useSelector((state) => state.auth.login?.currentUser);
-
+  const API_URL = process.env.REACT_APP_API_URL;
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
@@ -40,7 +40,7 @@ const Header = ({ role }) => {
   const handleAddBalance = async () => {
     try {
       const response = await axios.put(
-        `http://localhost:5000/update-wallet/${user._id}`,
+        `${API_URL}let/${user._id}`,
         { changeWallet: Number(amount) }
       );
       if (response.data.success) {

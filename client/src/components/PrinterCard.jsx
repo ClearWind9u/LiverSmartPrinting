@@ -14,6 +14,7 @@ const PrinterCard = ({ printer, userRole }) => {
   const [selectedImage, setSelectedImage] = useState(printer.image || null);
   const [file, setFile] = useState(null);
   const [error, setError] = useState("");
+  const API_URL = process.env.REACT_APP_API_URL;
 
   const handleInfoModalOpen = () => setIsInfoModalOpen(true);
   const handleInfoModalClose = () => setIsInfoModalOpen(false);
@@ -50,7 +51,7 @@ const PrinterCard = ({ printer, userRole }) => {
         information,
       };
 
-      const response = await axios.put(`http://localhost:5000/printers/${printer._id}`, updatedData, {
+      const response = await axios.put(`${API_URL}/printers/${printer._id}`, updatedData, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -71,10 +72,10 @@ const PrinterCard = ({ printer, userRole }) => {
   const deletePrinter = async () => {
     try {
       // Xóa máy in
-      const response = await axios.delete(`http://localhost:5000/printers/${printer._id}`);
+      const response = await axios.delete(`${API_URL}/printers/${printer._id}`);
       if (response.status === 200) {
         // Gọi API xóa lịch sử in theo printerId
-        const historyResponse = await axios.delete(`http://localhost:5000/histories/printer/${printer._id}`);
+        const historyResponse = await axios.delete(`${API_URL}/histories/printer/${printer._id}`);
         if (historyResponse.status === 200) {
           alert("Printer and related history deleted successfully!");
         } else {
@@ -93,7 +94,7 @@ const PrinterCard = ({ printer, userRole }) => {
   const handleToggleStatus = async () => {
     const newStatus = isEnabled ? "Disable" : "Enable"; // Đảo trạng thái
     try {
-      const response = await axios.put(`http://localhost:5000/printers/${printer._id}`, {
+      const response = await axios.put(`${API_URL}/printers/${printer._id}`, {
         status: newStatus, // Gửi trạng thái mới
       });
 

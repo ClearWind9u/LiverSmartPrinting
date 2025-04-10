@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { useSelector } from "react-redux";
 import SwapVertIcon from '@mui/icons-material/SwapVert';
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 const StudentPrintingLog = () => {
   const user = useSelector((state) => state.auth.login?.currentUser);
@@ -9,11 +9,12 @@ const StudentPrintingLog = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+  const API_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     const fetchPrintingLogs = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/histories/user/${user._id}`);
+        const response = await axios.get(`${API_URL}/histories/user/${user._id}`);
         if (response.data.success) {
             const logs = response.data.history.map((log) => ({
                 id: log._id,

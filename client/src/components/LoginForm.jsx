@@ -1,19 +1,20 @@
-import React, { useState } from "react";
 import axios from "axios";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { loginSuccess } from "../redux/userSlice";
 import { Link } from "react-router-dom"; // Import Link
+import { loginSuccess } from "../redux/userSlice";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const dispatch = useDispatch();
+  const API_URL = process.env.REACT_APP_API_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/login", {
+      const response = await axios.post(`${API_URL}/login`, {
         email,
         password,
       });

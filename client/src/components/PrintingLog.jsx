@@ -1,17 +1,18 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
 import SwapVertIcon from '@mui/icons-material/SwapVert';
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 
 const PrintingLog = () => {
   const [printingLog, setPrintingLog] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+  const API_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     const fetchPrintingLogs = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/histories");
+        const response = await axios.get(`${API_URL}/histories`);
         if (response.data.success) {
           const printInfo = response.data.histories.flatMap((history) =>
             history.printInfo.map((info, index) => ({
@@ -28,7 +29,7 @@ const PrintingLog = () => {
           const users = await Promise.all(
             userId.map(async (id) => {
               const response = await axios.get(
-                "http://localhost:5000/user/" + id
+                `${API_URL}/user/` + id
               );
               return response.data;
             })
@@ -41,7 +42,7 @@ const PrintingLog = () => {
           const printers = await Promise.all(
             printerId.map(async (id) => {
               const response = await axios.get(
-                "http://localhost:5000/printers/" + id
+                `${API_URL}/printers/` + id
               );
               return response.data;
             })

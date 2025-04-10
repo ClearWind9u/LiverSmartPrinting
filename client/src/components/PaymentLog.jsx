@@ -1,17 +1,18 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 
 const PaymentLog = () => {
   const [paymentLog, setPaymentLog] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+  const API_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     const fetchPaymentLogs = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/pages");
+        const response = await axios.get(`${API_URL}/pages`);
         if (response.data.success) {
           const buyData = response.data.buypages.map((log, index) => ({
             id: `${log._id}`,
@@ -27,7 +28,7 @@ const PaymentLog = () => {
           const users = await Promise.all(
             userId.map(async (id) => {
               const response = await axios.get(
-                "http://localhost:5000/user/" + id
+                `${API_URL}/user/` + id
               );
               return response.data;
             })

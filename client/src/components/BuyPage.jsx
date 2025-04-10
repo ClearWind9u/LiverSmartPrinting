@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useSelector, useDispatch } from "react-redux";
-import NotificationModal from "./NotificationModal"; // Import the new NotificationModal component
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { loginSuccess } from "../redux/userSlice";
+import NotificationModal from "./NotificationModal"; // Import the new NotificationModal component
 
 const BuyPage = () => {
   const [paperType, setPaperType] = useState("A4");  // Default to A4
@@ -14,11 +14,12 @@ const BuyPage = () => {
   const dispatch = useDispatch();
   const [notification, setNotification] = useState(null); // State for notification
   const user = useSelector((state) => state.auth.login?.currentUser);
+  const API_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     const fetchPagePrice = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/balance");
+        const response = await axios.get(`${API_URL}/balance`);
         if (response.data.success) {
           const pages = response.data.balancePages.map((page) => ({
             id: `${page._id}`,
@@ -71,7 +72,7 @@ const BuyPage = () => {
       return;
     }
     try {
-      const response = await axios.post("http://localhost:5000/pages/create", {
+      const response = await axios.post(`${API_URL}/pages/create`, {
         type: paperType,
         quantity,
         totalPrice,
@@ -79,11 +80,11 @@ const BuyPage = () => {
       });
 
       if (response.data.success) {
-        const balanceUpdateResponse = await axios.put(`http://localhost:5000/update-balance/${user._id}`, {
+        const balanceUpdateResponse = await axios.put(`${API_URL}/update-balance/${user._id}`, {
           pageSize: paperType,
           changePage: Number(quantity),
         });
-        const walletUpdateResponse = await axios.put(`http://localhost:5000/update-wallet/${user._id}`, { changeWallet: Number(totalPrice) * -1 });
+        const walletUpdateResponse = await axios.put(`${API_URL}/update-wallet/${user._id}`, { changeWallet: Number(totalPrice) * -1 });
         if (balanceUpdateResponse.data.success && walletUpdateResponse.data.success) {
           const updateUser = {
             ...user,

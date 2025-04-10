@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { useSelector } from "react-redux";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 const StudentPaymentLog = ({ userId }) => {
   const [paymentLog, setPaymentLog] = useState([]);
@@ -9,11 +9,12 @@ const StudentPaymentLog = ({ userId }) => {
   const [error, setError] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const user = useSelector((state) => state.auth.login?.currentUser);
+  const API_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     const fetchPaymentLogs = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/pages/user/${user._id}`);
+        const response = await axios.get(`${API_URL}/pages/user/${user._id}`);
         if (response.data.success) {
           // Map dữ liệu API thành dữ liệu hiển thị
           const logs = response.data.buypage.map((log) => ({

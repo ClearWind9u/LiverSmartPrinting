@@ -1,16 +1,17 @@
-import React, { useEffect, useState } from "react";
-import PrinterCard from "./PrinterCard";
-import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
 import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import PrinterCard from "./PrinterCard";
 
 const PrinterGrid = ({ role }) => {
   const [printers, setPrinters] = useState([]);
   const user = useSelector((state) => state.auth.login?.currentUser);
+  const API_URL = process.env.REACT_APP_API_URL;
 
   const fetchPrinters = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/printers", {
+      const response = await axios.get(`${API_URL}/printers`, {
         headers: {
           "Content-Type": "application/json",
         },

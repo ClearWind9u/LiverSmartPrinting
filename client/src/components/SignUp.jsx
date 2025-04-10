@@ -1,5 +1,5 @@
-import React, { useState } from "react";
 import axios from "axios";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 const SignUp = () => {
@@ -9,6 +9,7 @@ const SignUp = () => {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     const navigate = useNavigate();
+    const API_URL = process.env.REACT_APP_API_URL;
 
     // Handle form submission
     const handleSubmit = async (e) => {
@@ -36,7 +37,7 @@ const SignUp = () => {
         };
 
         try {
-            const response = await axios.post("http://localhost:5000/register", userData);
+            const response = await axios.post(`${API_URL}/register`, userData);
             const data = response.data;
 
             if (data.success) {

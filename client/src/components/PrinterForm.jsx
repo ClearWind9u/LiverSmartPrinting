@@ -18,11 +18,12 @@ const PrinterForm = () => {
   const [balancePage, setBalancePage] = useState(0);
   const user = useSelector((state) => state.auth.login?.currentUser);
   const navigate = useNavigate();
+  const API_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     const fetchPrinter = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/printers/${id}`, {
+        const response = await axios.get(`${API_URL}/printers/${id}`, {
           headers: {
             "Content-Type": "application/json",
           },
@@ -40,7 +41,7 @@ const PrinterForm = () => {
     const fetchBalance = async () => {
       try {
         // Gọi API lấy số dư
-        const response = await axios.get(`http://localhost:5000/balance/${pageSize}/${user._id}`);
+        const response = await axios.get(`${API_URL}/balance/${pageSize}/${user._id}`);
 
         if (response.data.success) {
           setBalancePage(response.data.data.balance || 0);
@@ -76,7 +77,7 @@ const PrinterForm = () => {
     
     try {
       // Gửi yêu cầu trừ số dư trang
-      const updateBalanceResponse = await axios.put(`http://localhost:5000/update-balance/${user._id}`, {
+      const updateBalanceResponse = await axios.put(`${API_URL}/update-balance/${user._id}`, {
         pageSize,
         changePage: -copies, // Số trang cần trừ
       });
@@ -99,7 +100,7 @@ const PrinterForm = () => {
         printerId: id,
       };
       
-      const response = await axios.post("http://localhost:5000/histories/create", printData, {
+      const response = await axios.post(`${API_URL}/histories/create`, printData, {
         headers: { "Content-Type": "application/json" },
       });
 

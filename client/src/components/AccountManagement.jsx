@@ -1,6 +1,6 @@
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 import Modal from "./Modal";
-import axios from "axios";
 import NotificationModal from "./NotificationModal"; // Import the new NotificationModal component
 
 const AccountManagement = () => {
@@ -9,11 +9,12 @@ const AccountManagement = () => {
   const [modalContent, setModalContent] = useState(null);
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [notification, setNotification] = useState(null); // State for notification
+  const API_URL = process.env.REACT_APP_API_URL;
 
   // Load danh sách tài khoản từ backend
   const fetchAccounts = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/users");
+      const response = await axios.get(`${API_URL}/users`);
       setAccounts(response.data.data);
     } catch (error) {
       console.error("Failed to fetch accounts", error);
@@ -33,7 +34,7 @@ const AccountManagement = () => {
   const handleAddAccount = async (newAccount) => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/register",
+        `${API_URL}/register`,
         newAccount
       );
       // setAccounts((prev) => [...prev, response.data.newUser]);
@@ -50,7 +51,7 @@ const AccountManagement = () => {
   const handleUpdateAccount = async (updatedAccount) => {
     try {
       const response = await axios.put(
-        `http://localhost:5000/update/${selectedAccount._id}`,
+        `${API_URL}/update/${selectedAccount._id}`,
         updatedAccount
       );
       setIsModalOpen(false);
@@ -65,12 +66,12 @@ const AccountManagement = () => {
   // Xử lý xóa tài khoản
   const handleDeleteAccount = async () => {
     try {
-      await axios.delete(`http://localhost:5000/delete/${selectedAccount._id}`);
+      await axios.delete(`${API_URL}/delete/${selectedAccount._id}`);
       if (selectedAccount.role === "user") {
       // Gọi API xóa lịch sử in theo userId
-      await axios.delete(`http://localhost:5000/histories/user/${selectedAccount._id}`);
+      await axios.delete(`${API_URL}/histories/user/${selectedAccount._id}`);
       // Gọi API xóa lịch sử mua trang in theo userId
-      await axios.delete(`http://localhost:5000/pages/user/${selectedAccount._id}`);
+      await axios.delete(`${API_URL}/pages/user/${selectedAccount._id}`);
       };
       setAccounts((prev) =>
         prev.filter((acc) => acc._id !== selectedAccount._id)
@@ -338,26 +339,7 @@ const EditAccountForm = ({ account, onClose, onSubmit }) => {
             className="border rounded w-full p-2"
           />
         </div>
-        {/* <div className="mb-4">
-          <label className="block font-medium mb-1">Password (Optional):</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            className="border rounded w-full p-2"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block font-medium mb-1">Confirm Password:</label>
-          <input
-            type="password"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            className="border rounded w-full p-2"
-          />
-        </div> */}
+
         <div className="flex justify-end">
           <button
             type="button"

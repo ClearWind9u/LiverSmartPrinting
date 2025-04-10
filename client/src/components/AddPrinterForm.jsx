@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
 import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
 
 const AddPrinterForm = () => {
   const [printerName, setPrinterName] = useState("");
@@ -11,6 +11,7 @@ const AddPrinterForm = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [error, setError] = useState("");
   const navigate = useNavigate(); // Khởi tạo useNavigate
+  const API_URL = process.env.REACT_APP_API_URL;
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -47,7 +48,7 @@ const AddPrinterForm = () => {
     }
     try {
       const response = await axios.post(
-        "http://localhost:5000/printers/create",
+        `${API_URL}/printers/create`,
         {
           name: printerName,
           price: price,

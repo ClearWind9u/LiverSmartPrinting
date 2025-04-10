@@ -7,11 +7,12 @@ const Profile = () => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const API_URL = process.env.REACT_APP_API_URL;
 
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
-                const response = await axios.get(`http://localhost:5000/user/${currentUser._id}`);
+                const response = await axios.get(`${API_URL}/user/${currentUser._id}`);
                 if (response.data.success) {
                     setUser(response.data.data);
                 } else {
