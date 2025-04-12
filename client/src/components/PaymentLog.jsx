@@ -14,13 +14,13 @@ const PaymentLog = () => {
       try {
         const response = await axios.get(`${API_URL}/pages`);
         if (response.data.success) {
-          const buyData = response.data.buypages.map((log, index) => ({
+          const buyData = response.data.buypages.map((log) => ({
             id: `${log._id}`,
             userId: log.userId,
             paperType: log.type,
             quantity: log.quantity,
-            totalPriceNum: log.totalPrice, // Store as number for sorting
-            totalPrice: `${log.totalPrice} VNĐ`, // Display with suffix
+            totalPriceNum: Number(log.totalPrice) || 0, // Ensure number
+            totalPrice: `${Number(log.totalPrice) || 0} VNĐ`, // Formatted for display
             date: new Date(log.time).toLocaleDateString(),
           }));
 
@@ -28,8 +28,13 @@ const PaymentLog = () => {
 
           const users = await Promise.all(
             userIds.map(async (id) => {
-              const response = await axios.get(`${API_URL}/user/${id}`);
-              return response.data;
+              try {
+                const response = await axios.get(`${API_URL}/user/${id}`);
+                return response.data;
+              } catch (err) {
+                console.error(`Error fetching user ${id}:`, err);
+                return { data: { username: "Unknown" } };
+              }
             })
           );
 
@@ -43,6 +48,7 @@ const PaymentLog = () => {
             date: log.date,
           }));
 
+          console.log("Payment logs:", logs); // Debug
           setPaymentLog(logs);
         } else {
           setError("Failed to fetch payment logs");
@@ -66,25 +72,20 @@ const PaymentLog = () => {
     setSortConfig({ key, direction });
 
     const sortedData = [...paymentLog].sort((a, b) => {
-      let aValue = a[key];
-      let bValue = b[key];
+      // Use totalPriceNum for totalPrice sorting
+      const aValue = key === "totalPrice" ? a.totalPriceNum : a[key];
+      const bValue = key === "totalPrice" ? b.totalPriceNum : b[key];
 
-      // Handle numerical sorting for totalPrice
-      if (key === "totalPrice") {
-        aValue = a.totalPriceNum;
-        bValue = b.totalPriceNum;
-      }
-
-      // Handle numerical columns (quantity, totalPriceNum)
-      if (typeof aValue === "number" && typeof bValue === "number") {
+      // Numerical sorting for totalPrice and quantity
+      if (key === "totalPrice" || key === "quantity") {
         return direction === "asc" ? aValue - bValue : bValue - aValue;
       }
 
-      // Handle string columns (id, userName, paperType, date)
-      aValue = aValue?.toString().toLowerCase() || "";
-      bValue = bValue?.toString().toLowerCase() || "";
-      if (aValue < bValue) return direction === "asc" ? -1 : 1;
-      if (aValue > bValue) return direction === "asc" ? 1 : -1;
+      // String sorting for other columns
+      const aStr = aValue?.toString().toLowerCase() || "";
+      const bStr = bValue?.toString().toLowerCase() || "";
+      if (aStr < bStr) return direction === "asc" ? -1 : 1;
+      if (aStr > bStr) return direction === "asc" ? 1 : -1;
       return 0;
     });
 
