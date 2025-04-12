@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 const PrinterCard = ({ printer, userRole }) => {
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // State để kiểm soát modal xác nhận xóa
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEnabled, setIsEnabled] = useState(printer.status === "Enable");
   const [printerName, setPrinterName] = useState(printer.name);
   const [type, setType] = useState(printer.type || "");
@@ -14,104 +14,143 @@ const PrinterCard = ({ printer, userRole }) => {
   const [selectedImage, setSelectedImage] = useState(printer.image || null);
   const [file, setFile] = useState(null);
   const [error, setError] = useState("");
-  const API_URL = 'https://liver-smart-printing-bf56.vercel.app';
+  const API_URL = "https://liver-smart-printing-bf56.vercel.app";
 
   const handleInfoModalOpen = () => setIsInfoModalOpen(true);
   const handleInfoModalClose = () => setIsInfoModalOpen(false);
   const handleEditModalOpen = () => setIsEditModalOpen(true);
-  const handleEditModalClose = () => setIsEditModalOpen(false);
+  const handleEditModalClose = () => {
+    setPrinterName(printer.name);
+    setType(printer.type || "");
+    setPrice(printer.price || "");
+    setInformation(printer.information || "");
+    setSelectedImage(printer.image || null);
+    setFile(null);
+    setError("");
+    setIsEditModalOpen(false);
+  };
+  const handleDeleteModalOpen = () => setIsDeleteModalOpen(true);
+  const handleDeleteModalClose = () => setIsDeleteModalOpen(false);
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
       const fileType = file.type;
       if (fileType === "image/jpeg" || fileType === "image/png") {
-        setError(""); // Clear any previous error
-        setSelectedImage(`../public/${file.name}`); // Store the relative image path
-        setFile(file); // Save the file for later use
+        setError("");
+        const imageUrl = URL.createObjectURL(file); // Temporary URL for preview
+        setSelectedImage(imageUrl);
+        setFile(file);
       } else {
         setError("Please upload a valid JPG or PNG file.");
+        setSelectedImage(printer.image);
+        setFile(null);
       }
     }
   };
 
   const updatePrinter = async (e) => {
     e.preventDefault();
+    setError("");
+
     if (!printerName || !price || !type || !information) {
-      alert("All fields are required!");
+      setError("All fields are required!");
+      return;
+    }
+
+    const priceNum = Number(price);
+    if (isNaN(priceNum) || priceNum <= 0) {
+      setError("Price must be a valid positive number.");
       return;
     }
 
     try {
-      const updatedData = {
-        name: printerName,
-        price,
-        type,
-        image: file ? `../public/${file.name}` : printer.image, // Use the new image or keep the old one
-        information,
-      };
+      const formData = new FormData();
+      formData.append("name", printerName);
+      formData.append("price", priceNum);
+      formData.append("type", type);
+      formData.append("information", information);
+      formData.append("status", isEnabled ? "Enable" : "Disable");
+      if (file) {
+        formData.append("image", file);
+      }
 
-      const response = await axios.put(`${API_URL}/printers/${printer._id}`, updatedData, {
+      const response = await axios.put(`${API_URL}/printers/${printer._id}`, formData, {
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "multipart/form-data",
         },
       });
 
-      if (response.status === 200) {
+      if (response.data.success) {
         alert("Printer updated successfully!");
+        setSelectedImage(response.data.updatedPrinter.image); // Update with new Cloudinary URL
         handleEditModalClose();
+        window.location.reload(); // Refresh to reflect changes
       } else {
-        alert(response.data.message || "Failed to update printer.");
+        setError(response.data.message || "Failed to update printer.");
       }
     } catch (error) {
-      console.error("Error updating printer:", error);
-      alert(error.response?.data?.message || "An error occurred. Please try again.");
+      console.error("Error updating printer:", {
+        message: error.message,
+        response: error.response?.data,
+      });
+      setError(
+        error.response?.data?.message || "An error occurred. Please try again."
+      );
     }
   };
 
   const deletePrinter = async () => {
     try {
-      // Xóa máy in
       const response = await axios.delete(`${API_URL}/printers/${printer._id}`);
-      if (response.status === 200) {
-        // Gọi API xóa lịch sử in theo printerId
-        const historyResponse = await axios.delete(`${API_URL}/histories/printer/${printer._id}`);
-        if (historyResponse.status === 200) {
+      if (response.data.success) {
+        const historyResponse = await axios.delete(
+          `${API_URL}/histories/printer/${printer._id}`
+        );
+        if (historyResponse.data.success) {
           alert("Printer and related history deleted successfully!");
         } else {
           alert(historyResponse.data.message || "Failed to delete history.");
         }
-        setIsDeleteModalOpen(false); // Đóng modal xác nhận xóa
+        setIsDeleteModalOpen(false);
+        window.location.reload();
       } else {
-        alert(response.data.message || "Failed to delete printer.");
+        setError(response.data.message || "Failed to delete printer.");
       }
     } catch (error) {
       console.error("Error deleting printer:", error);
-      alert(error.response?.data?.message || "An error occurred while deleting.");
+      setError(
+        error.response?.data?.message ||
+          "An error occurred while deleting."
+      );
     }
   };
 
   const handleToggleStatus = async () => {
-    const newStatus = isEnabled ? "Disable" : "Enable"; // Đảo trạng thái
+    const newStatus = isEnabled ? "Disable" : "Enable";
     try {
-      const response = await axios.put(`${API_URL}/printers/${printer._id}`, {
-        status: newStatus, // Gửi trạng thái mới
-      });
+      const formData = new FormData();
+      formData.append("status", newStatus);
+      const response = await axios.put(
+        `${API_URL}/printers/${printer._id}`,
+        formData
+      );
 
-      if (response.status === 200) {
-        alert(`Printer ${newStatus === "Enable" ? "enabled" : "disabled"} successfully!`);
-        setIsEnabled(!isEnabled); // Cập nhật trạng thái trong UI
+      if (response.data.success) {
+        alert(
+          `Printer ${
+            newStatus === "Enable" ? "enabled" : "disabled"
+          } successfully!`
+        );
+        setIsEnabled(!isEnabled);
       } else {
-        alert("Failed to update printer status.");
+        setError("Failed to update printer status.");
       }
     } catch (error) {
       console.error("Error updating printer status:", error);
-      alert("An error occurred while updating the printer status.");
+      setError("An error occurred while updating the printer status.");
     }
   };
-
-  const handleDeleteModalOpen = () => setIsDeleteModalOpen(true);
-  const handleDeleteModalClose = () => setIsDeleteModalOpen(false);
 
   useEffect(() => {
     return () => {
@@ -122,15 +161,23 @@ const PrinterCard = ({ printer, userRole }) => {
   }, [selectedImage]);
 
   return (
-    <div className={`w-[300px] h-[320px] border-gray-300 border-2 rounded-xl flex flex-col items-center ${isEnabled ? "bg-white" : "bg-gray-400"}`}>
-      <h3 className={`text-[20px] font-semibold mt-4 ${isEnabled ? "text-black" : "text-gray-700"}`}>
+    <div
+      className={`w-[300px] h-[320px] border-gray-300 border-2 rounded-xl flex flex-col items-center ${
+        isEnabled ? "bg-white" : "bg-gray-400"
+      }`}
+    >
+      <h3
+        className={`text-[20px] font-semibold mt-4 ${
+          isEnabled ? "text-black" : "text-gray-700"
+        }`}
+      >
         {printer.name}
       </h3>
       <img
         src={selectedImage || printer.image}
         alt="Printer"
         className="w-[300px] h-[200px] object-cover"
-        style={{ filter: isEnabled ? "none" : "grayscale(100%)" }} // Apply grayscale if disabled
+        style={{ filter: isEnabled ? "none" : "grayscale(100%)" }}
       />
       {userRole === "user" && (
         <div className="flex justify-between items-center w-5/6 pt-4">
@@ -142,9 +189,7 @@ const PrinterCard = ({ printer, userRole }) => {
               Select
             </Link>
           ) : (
-            <span
-              className="bg-[#f05258] text-white text-center px-4 py-1 rounded-full w-[120px] cursor-not-allowed"
-            >
+            <span className="bg-[#f05258] text-white text-center px-4 py-1 rounded-full w-[120px] cursor-not-allowed">
               Select
             </span>
           )}
@@ -177,7 +222,9 @@ const PrinterCard = ({ printer, userRole }) => {
             >
               x
             </button>
-            <h2 className="text-2xl font-bold mb-4 text-center">{printer.name}</h2>
+            <h2 className="text-2xl font-bold mb-4 text-center">
+              {printer.name}
+            </h2>
             <p className="mb-4">{printer.information}</p>
             {userRole === "admin" && (
               <div className="flex justify-between items-center mt-4">
@@ -189,7 +236,7 @@ const PrinterCard = ({ printer, userRole }) => {
                 </button>
                 <button
                   className="bg-[#f05258] text-white px-4 py-1 rounded-full"
-                  onClick={handleDeleteModalOpen} // Mở modal xác nhận xóa
+                  onClick={handleDeleteModalOpen}
                 >
                   Delete
                 </button>
@@ -199,14 +246,18 @@ const PrinterCard = ({ printer, userRole }) => {
                       type="checkbox"
                       className="sr-only"
                       checked={isEnabled}
-                      onChange={handleToggleStatus} // Gọi hàm xử lý thay đổi trạng thái
+                      onChange={handleToggleStatus}
                     />
                     <div
-                      className={`block w-14 h-6 rounded-full ${isEnabled ? "bg-green-500" : "bg-gray-600"}`}
+                      className={`block w-14 h-6 rounded-full ${
+                        isEnabled ? "bg-green-500" : "bg-gray-600"
+                      }`}
                       style={{ height: "35px" }}
                     ></div>
                     <div
-                      className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${isEnabled ? "transform translate-x-full bg-green-500" : ""}`}
+                      className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${
+                        isEnabled ? "transform translate-x-full bg-green-500" : ""
+                      }`}
                     />
                   </div>
                   <div className="ml-3 text-gray-600 font-medium">
@@ -222,19 +273,27 @@ const PrinterCard = ({ printer, userRole }) => {
       {/* Edit Modal */}
       {isEditModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg mx-4 shadow-lg w-[900px]" style={{ maxHeight: "700px", overflowY: "auto" }}>
+          <div
+            className="bg-white p-6 rounded-lg mx-4 shadow-lg w-[900px]"
+            style={{ maxHeight: "700px", overflowY: "auto" }}
+          >
             <button
               className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
               onClick={handleEditModalClose}
             >
-              &times;
+              ×
             </button>
-            <h2 className="text-2xl font-bold mb-4 text-center">Edit Printer Information</h2>
-            <form>
+            <h2 className="text-2xl font-bold mb-4 text-center">
+              Edit Printer Information
+            </h2>
+            {error && <p className="text-red-500 mb-4">{error}</p>}
+            <form onSubmit={updatePrinter}>
               <div className="grid grid-cols-2 gap-4">
                 {/* Name */}
                 <div className="mb-4">
-                  <label className="block text-gray-700 font-medium mb-1">Name:</label>
+                  <label className="block text-gray-700 font-medium mb-1">
+                    Name:
+                  </label>
                   <input
                     type="text"
                     value={printerName}
@@ -245,7 +304,9 @@ const PrinterCard = ({ printer, userRole }) => {
 
                 {/* Type */}
                 <div className="mb-4">
-                  <label className="block text-gray-700 font-medium mb-1">Type:</label>
+                  <label className="block text-gray-700 font-medium mb-1">
+                    Type:
+                  </label>
                   <input
                     type="text"
                     value={type}
@@ -256,18 +317,24 @@ const PrinterCard = ({ printer, userRole }) => {
 
                 {/* Price */}
                 <div className="mb-4">
-                  <label className="block text-gray-700 font-medium mb-1">Price:</label>
+                  <label className="block text-gray-700 font-medium mb-1">
+                    Price:
+                  </label>
                   <input
-                    type="text"
+                    type="number"
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
                     className="border rounded w-full px-3 py-2"
+                    min="0"
+                    step="0.01"
                   />
                 </div>
 
                 {/* Information */}
                 <div className="mb-4 col-span-2">
-                  <label className="block text-gray-700 font-medium mb-1">Information:</label>
+                  <label className="block text-gray-700 font-medium mb-1">
+                    Information:
+                  </label>
                   <textarea
                     value={information}
                     onChange={(e) => setInformation(e.target.value)}
@@ -287,7 +354,6 @@ const PrinterCard = ({ printer, userRole }) => {
                       onChange={handleImageChange}
                       className="cursor-pointer text-black"
                     />
-                    {error && <p className="text-red-500 mt-2">{error}</p>}
                     {selectedImage && (
                       <div>
                         <p className="text-blue-500 mt-2">Image preview:</p>
@@ -311,7 +377,6 @@ const PrinterCard = ({ printer, userRole }) => {
                 </button>
                 <button
                   type="submit"
-                  onClick={updatePrinter}
                   className="px-4 py-2 bg-blue-500 text-white rounded"
                 >
                   Save Changes
@@ -326,7 +391,9 @@ const PrinterCard = ({ printer, userRole }) => {
       {isDeleteModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg w-[400px] shadow-lg">
-            <h2 className="text-2xl font-bold mb-4 text-center">Are you sure you want to delete this printer?</h2>
+            <h2 className="text-2xl font-bold mb-4 text-center">
+              Are you sure you want to delete this printer?
+            </h2>
             <div className="flex justify-between mt-4">
               <button
                 className="px-4 py-2 bg-gray-300 text-gray-800 rounded"
@@ -336,7 +403,7 @@ const PrinterCard = ({ printer, userRole }) => {
               </button>
               <button
                 className="px-4 py-2 bg-red-500 text-white rounded"
-                onClick={deletePrinter} // Xóa máy in
+                onClick={deletePrinter}
               >
                 Delete
               </button>
