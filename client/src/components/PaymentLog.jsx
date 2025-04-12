@@ -7,7 +7,7 @@ const PaymentLog = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
-  const API_URL = 'https://liver-smart-printing-bf56.vercel.app';
+  const API_URL = "https://liver-smart-printing-bf56.vercel.app";
 
   useEffect(() => {
     const fetchPaymentLogs = async () => {
@@ -19,26 +19,26 @@ const PaymentLog = () => {
             userId: log.userId,
             paperType: log.type,
             quantity: log.quantity,
-            totalPrice: `${log.totalPrice} VNĐ`,
+            totalPriceNum: log.totalPrice, // Store as number for sorting
+            totalPrice: `${log.totalPrice} VNĐ`, // Display with suffix
             date: new Date(log.time).toLocaleDateString(),
           }));
 
-          const userId = buyData.map((log) => log.userId);
+          const userIds = buyData.map((log) => log.userId);
 
           const users = await Promise.all(
-            userId.map(async (id) => {
-              const response = await axios.get(
-                `${API_URL}/user/` + id
-              );
+            userIds.map(async (id) => {
+              const response = await axios.get(`${API_URL}/user/${id}`);
               return response.data;
             })
           );
 
           const logs = buyData.map((log, index) => ({
             id: log.id,
-            userName: users[index].data.username,
+            userName: users[index].data?.username || "Unknown",
             paperType: log.paperType,
             quantity: log.quantity,
+            totalPriceNum: log.totalPriceNum,
             totalPrice: log.totalPrice,
             date: log.date,
           }));
@@ -48,7 +48,7 @@ const PaymentLog = () => {
           setError("Failed to fetch payment logs");
         }
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching payment logs:", err);
         setError("An error occurred while fetching payment logs");
       } finally {
         setLoading(false);
@@ -66,10 +66,28 @@ const PaymentLog = () => {
     setSortConfig({ key, direction });
 
     const sortedData = [...paymentLog].sort((a, b) => {
-      if (a[key] < b[key]) return direction === "asc" ? -1 : 1;
-      if (a[key] > b[key]) return direction === "asc" ? 1 : -1;
+      let aValue = a[key];
+      let bValue = b[key];
+
+      // Handle numerical sorting for totalPrice
+      if (key === "totalPrice") {
+        aValue = a.totalPriceNum;
+        bValue = b.totalPriceNum;
+      }
+
+      // Handle numerical columns (quantity, totalPriceNum)
+      if (typeof aValue === "number" && typeof bValue === "number") {
+        return direction === "asc" ? aValue - bValue : bValue - aValue;
+      }
+
+      // Handle string columns (id, userName, paperType, date)
+      aValue = aValue?.toString().toLowerCase() || "";
+      bValue = bValue?.toString().toLowerCase() || "";
+      if (aValue < bValue) return direction === "asc" ? -1 : 1;
+      if (aValue > bValue) return direction === "asc" ? 1 : -1;
       return 0;
     });
+
     setPaymentLog(sortedData);
   };
 
@@ -83,18 +101,19 @@ const PaymentLog = () => {
         <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-md">
           <thead>
             <tr className="bg-gray-100">
-              {["ID", "User Name", "Paper Type", "Quantity", "Total Price", "Date"].map((col, index) => {
-                // Hàm chuyển đổi tiêu đề sang định dạng yêu cầu
+              {["ID", "User Name", "Paper Type", "Quantity", "Total Price", "Date"].map((col) => {
                 const convertKey = (str) => {
                   const words = str.split(" ");
                   return words
-                    .map((word, idx) => idx === 0 ? word.toLowerCase() : word.charAt(0).toUpperCase() + word.slice(1))
+                    .map((word, idx) =>
+                      idx === 0 ? word.toLowerCase() : word.charAt(0).toUpperCase() + word.slice(1)
+                    )
                     .join("");
                 };
                 const key = convertKey(col);
                 return (
                   <th
-                    key={index}
+                    key={key}
                     className="py-3 px-6 border-b text-left cursor-pointer"
                     onClick={() => handleSort(key)}
                   >
