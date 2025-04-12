@@ -17,7 +17,7 @@ const Home = () => {
 
         <div className="w-1/2 flex justify-center items-center">
           <img
-            src="../../assets/ANH1.png"
+            src="/ANH1.png"
             alt="Smart Printer"
             className="w-10/10 h-auto rounded-lg"
           />
