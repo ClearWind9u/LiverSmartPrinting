@@ -38,7 +38,7 @@ const PrinterCard = ({ printer, userRole }) => {
       const fileType = file.type;
       if (fileType === "image/jpeg" || fileType === "image/png") {
         setError("");
-        const imageUrl = URL.createObjectURL(file); // Temporary URL for preview
+        const imageUrl = URL.createObjectURL(file);
         setSelectedImage(imageUrl);
         setFile(file);
       } else {
@@ -52,6 +52,11 @@ const PrinterCard = ({ printer, userRole }) => {
   const updatePrinter = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (!printer?._id || !/^[0-9a-fA-F]{24}$/.test(printer._id)) {
+      setError("Invalid printer ID.");
+      return;
+    }
 
     if (!printerName || !price || !type || !information) {
       setError("All fields are required!");
@@ -75,17 +80,21 @@ const PrinterCard = ({ printer, userRole }) => {
         formData.append("image", file);
       }
 
-      const response = await axios.put(`${API_URL}/printers/${printer._id}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axios.put(
+        `${API_URL}/printers/${printer._id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       if (response.data.success) {
         alert("Printer updated successfully!");
-        setSelectedImage(response.data.updatedPrinter.image); // Update with new Cloudinary URL
+        setSelectedImage(response.data.updatedPrinter.image);
         handleEditModalClose();
-        window.location.reload(); // Refresh to reflect changes
+        window.location.reload();
       } else {
         setError(response.data.message || "Failed to update printer.");
       }
@@ -93,9 +102,11 @@ const PrinterCard = ({ printer, userRole }) => {
       console.error("Error updating printer:", {
         message: error.message,
         response: error.response?.data,
+        status: error.response?.status,
       });
       setError(
-        error.response?.data?.message || "An error occurred. Please try again."
+        error.response?.data?.message ||
+          "An error occurred while updating. Please try again."
       );
     }
   };
@@ -131,6 +142,10 @@ const PrinterCard = ({ printer, userRole }) => {
     try {
       const formData = new FormData();
       formData.append("status", newStatus);
+      formData.append("name", printerName);
+      formData.append("price", price);
+      formData.append("type", type);
+      formData.append("information", information);
       const response = await axios.put(
         `${API_URL}/printers/${printer._id}`,
         formData
@@ -178,6 +193,10 @@ const PrinterCard = ({ printer, userRole }) => {
         alt="Printer"
         className="w-[300px] h-[200px] object-cover"
         style={{ filter: isEnabled ? "none" : "grayscale(100%)" }}
+        onError={(e) => {
+          console.error("Image load error:", printer.image);
+          e.target.src = "/fallback-image.jpg"; // Optional fallback
+        }}
       />
       {userRole === "user" && (
         <div className="flex justify-between items-center w-5/6 pt-4">
@@ -217,10 +236,11 @@ const PrinterCard = ({ printer, userRole }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg w-[400px] shadow-lg">
             <button
-              className="text-bold absolute text-gray-500 hover:text-gray-700"
+              className="absolute text-gray-500 hover:text-gray-700"
+              style={{ top: "10px", right: "10px" }}
               onClick={handleInfoModalClose}
             >
-              x
+              ×
             </button>
             <h2 className="text-2xl font-bold mb-4 text-center">
               {printer.name}
@@ -249,14 +269,13 @@ const PrinterCard = ({ printer, userRole }) => {
                       onChange={handleToggleStatus}
                     />
                     <div
-                      className={`block w-14 h-6 rounded-full ${
+                      className={`block w-14 h-8 rounded-full ${
                         isEnabled ? "bg-green-500" : "bg-gray-600"
                       }`}
-                      style={{ height: "35px" }}
                     ></div>
                     <div
                       className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${
-                        isEnabled ? "transform translate-x-full bg-green-500" : ""
+                        isEnabled ? "translate-x-6" : ""
                       }`}
                     />
                   </div>
@@ -289,7 +308,6 @@ const PrinterCard = ({ printer, userRole }) => {
             {error && <p className="text-red-500 mb-4">{error}</p>}
             <form onSubmit={updatePrinter}>
               <div className="grid grid-cols-2 gap-4">
-                {/* Name */}
                 <div className="mb-4">
                   <label className="block text-gray-700 font-medium mb-1">
                     Name:
@@ -301,8 +319,6 @@ const PrinterCard = ({ printer, userRole }) => {
                     className="border rounded w-full px-3 py-2"
                   />
                 </div>
-
-                {/* Type */}
                 <div className="mb-4">
                   <label className="block text-gray-700 font-medium mb-1">
                     Type:
@@ -314,8 +330,6 @@ const PrinterCard = ({ printer, userRole }) => {
                     className="border rounded w-full px-3 py-2"
                   />
                 </div>
-
-                {/* Price */}
                 <div className="mb-4">
                   <label className="block text-gray-700 font-medium mb-1">
                     Price:
@@ -329,8 +343,6 @@ const PrinterCard = ({ printer, userRole }) => {
                     step="0.01"
                   />
                 </div>
-
-                {/* Information */}
                 <div className="mb-4 col-span-2">
                   <label className="block text-gray-700 font-medium mb-1">
                     Information:
@@ -341,8 +353,6 @@ const PrinterCard = ({ printer, userRole }) => {
                     className="border rounded w-full px-3 py-2"
                   ></textarea>
                 </div>
-
-                {/* Picture */}
                 <div className="mb-4 col-span-2">
                   <label className="block text-gray-700 font-medium mb-2">
                     Picture of Printer:
