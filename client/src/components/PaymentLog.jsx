@@ -20,7 +20,7 @@ const PaymentLog = () => {
             paperType: log.type,
             quantity: log.quantity,
             totalPriceNum: Number(log.totalPrice) || 0, // Ensure number
-            totalPrice: `${Number(log.totalPrice) || 0} VNĐ`, // Formatted for display
+            totalPrice: Number(log.totalPrice) || 0, // Formatted for display
             date: new Date(log.time).toLocaleDateString(),
           }));
 
@@ -134,7 +134,7 @@ const PaymentLog = () => {
                 <td className="py-3 px-6 border-b text-left">{log.userName}</td>
                 <td className="py-3 px-6 border-b text-left">{log.paperType}</td>
                 <td className="py-3 px-6 border-b text-left">{log.quantity}</td>
-                <td className="py-3 px-6 border-b text-left">{log.totalPrice}</td>
+                <td className="py-3 px-6 border-b text-left">{log.totalPrice} VNĐ</td>
                 <td className="py-3 px-6 border-b text-left">{log.date}</td>
               </tr>
             ))}
