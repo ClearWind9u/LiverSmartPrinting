@@ -10,8 +10,9 @@ const AddPrinterForm = () => {
   const [file, setFile] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const API_URL = 'https://liver-smart-printing-bf56.vercel.app';
+  const API_URL = 'https://liver-smart-printing-bf56.vercel.app'; // or 'http://localhost:5000' for local
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -40,20 +41,28 @@ const AddPrinterForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
 
-    // Validate form data
-    if (!printerName || !information || !type || !price || !file) {
-      setError('All fields are required');
+    if (!printerName || !type || !price || !information || !file) {
+      setError('All fields are required, including an image.');
+      setLoading(false);
       return;
     }
 
-    // Create FormData object
+    const priceNum = Number(price);
+    if (isNaN(priceNum) || priceNum <= 0) {
+      setError('Price must be a valid positive number.');
+      setLoading(false);
+      return;
+    }
+
     const formData = new FormData();
     formData.append('name', printerName);
     formData.append('price', price);
     formData.append('type', type);
     formData.append('information', information);
-    formData.append('image', file); // Append the file
+    formData.append('image', file);
 
     try {
       const response = await axios.post(`${API_URL}/printers/create`, formData, {
@@ -64,7 +73,6 @@ const AddPrinterForm = () => {
 
       if (response.data.success) {
         alert('Printer added successfully!');
-        // Clear form
         setPrinterName('');
         setType('');
         setPrice('');
@@ -72,17 +80,22 @@ const AddPrinterForm = () => {
         setFile(null);
         setSelectedImage(null);
         setError('');
-        // Redirect to /printers
         navigate('/printers');
       } else {
-        setError(response.data.message || 'Failed to add printer');
+        setError(response.data.message || 'Failed to add printer.');
       }
     } catch (err) {
-      console.error(err);
+      console.error('Error adding printer:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+      });
       setError(
         err.response?.data?.message ||
-          'Something went wrong. Please try again later.'
+          'Failed to connect to the server. Please try again later.'
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -95,6 +108,7 @@ const AddPrinterForm = () => {
         encType="multipart/form-data"
       >
         <h2 className="text-lg font-semibold mb-4 text-center">Add Printer</h2>
+        {error && <p className="text-red-500 mb-4">{error}</p>}
         <div className="grid grid-cols-2 gap-4">
           <div className="mb-4">
             <label className="block font-medium mb-1">Name:</label>
@@ -103,6 +117,7 @@ const AddPrinterForm = () => {
               value={printerName}
               onChange={(e) => setPrinterName(e.target.value)}
               className="border rounded w-full p-2"
+              disabled={loading}
             />
           </div>
           <div className="mb-4">
@@ -112,23 +127,28 @@ const AddPrinterForm = () => {
               value={type}
               onChange={(e) => setType(e.target.value)}
               className="border rounded w-full p-2"
+              disabled={loading}
             />
           </div>
           <div className="mb-4">
             <label className="block font-medium mb-1">Price:</label>
             <input
-              type="text"
+              type="number"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               className="border rounded w-full p-2"
+              min="0"
+              step="0.01"
+              disabled={loading}
             />
           </div>
-          <div className="mb-4 col-grid-2">
+          <div className="mb-4 col-span-2">
             <label className="block font-medium mb-1">Information:</label>
             <textarea
               value={information}
               onChange={(e) => setInformation(e.target.value)}
               className="border rounded w-full p-2"
+              disabled={loading}
             ></textarea>
           </div>
           <div className="mb-2 col-span-2">
@@ -139,8 +159,8 @@ const AddPrinterForm = () => {
                 accept=".jpg,.jpeg,.png"
                 onChange={handleImageChange}
                 className="cursor-pointer text-black"
+                disabled={loading}
               />
-              {error && <p className="text-red-500">{error}</p>}
               {selectedImage && (
                 <div>
                   <p className="text-blue-500">Image preview:</p>
@@ -163,9 +183,12 @@ const AddPrinterForm = () => {
           </Link>
           <button
             type="submit"
-            className="px-4 py-2 bg-red-500 text-white rounded"
+            className={`px-4 py-2 text-white rounded ${
+              loading ? 'bg-gray-500 cursor-not-allowed' : 'bg-red-500'
+            }`}
+            disabled={loading}
           >
-            Add
+            {loading ? 'Adding...' : 'Add'}
           </button>
         </div>
       </form>

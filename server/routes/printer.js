@@ -1,40 +1,50 @@
 import express from "express";
 import Printer from "../models/printer.js";
 import multer from "multer";
-import path from "path";
+import { v2 as cloudinary } from "cloudinary";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
-// Configure multer storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Store files in the 'uploads' folder
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname)); // e.g., 1631234567890-123456789.jpg
-  },
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// File filter to accept only JPG and PNG
-const fileFilter = (req, file, cb) => {
-  const fileTypes = /jpeg|jpg|png/;
-  const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = fileTypes.test(file.mimetype);
-
-  if (extname && mimetype) {
-    return cb(null, true);
-  } else {
-    cb(new Error("Only JPG and PNG files are allowed"));
-  }
-};
-
-// Initialize multer
+// Multer memory storage (no disk storage needed)
 const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // Limit to 5MB
+  storage: multer.memoryStorage(),
+  fileFilter: (req, file, cb) => {
+    const fileTypes = /jpeg|jpg|png/;
+    const extname = fileTypes.test(file.originalname.toLowerCase().split('.').pop());
+    const mimetype = fileTypes.test(file.mimetype);
+    if (extname && mimetype) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only JPG and PNG files are allowed"));
+    }
+  },
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
 });
+
+// Upload to Cloudinary
+const uploadToCloudinary = async (file) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: "printers" }, // Store in 'printers' folder in Cloudinary
+      (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.secure_url); // Return the public URL
+        }
+      }
+    );
+    stream.end(file.buffer);
+  });
+};
 
 // View printers
 router.get("/", async (req, res) => {
@@ -51,12 +61,12 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
   try {
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ success: false, message: "Invalid printer ID" });
+    }
     const printer = await Printer.findById(id);
     if (!printer) {
-      return res.status(404).json({
-        success: false,
-        message: "Printer not found",
-      });
+      return res.status(404).json({ success: false, message: "Printer not found" });
     }
     res.json({ success: true, printer });
   } catch (error) {
@@ -69,28 +79,38 @@ router.get("/:id", async (req, res) => {
 router.post("/create", upload.single("image"), async (req, res) => {
   const { name, price, type, information } = req.body;
 
-  // Validate required fields
   if (!name || !price || !type || !information) {
     return res.status(400).json({ success: false, message: "All fields are required" });
   }
 
-  // Check if file was uploaded
   if (!req.file) {
     return res.status(400).json({ success: false, message: "Image is required" });
   }
 
+  const priceNum = Number(price);
+  if (isNaN(priceNum) || priceNum <= 0) {
+    return res.status(400).json({ success: false, message: "Price must be a valid positive number" });
+  }
+
   try {
+    const imageUrl = await uploadToCloudinary(req.file);
     const newPrinter = new Printer({
       name,
-      price,
+      price: priceNum,
       type,
-      image: `/uploads/${req.file.filename}`, // Store relative path
+      image: imageUrl,
       status: "Enable",
       information,
     });
     await newPrinter.save();
     res.status(200).json({ success: true, message: "Create success", printer: newPrinter });
   } catch (error) {
+    if (error instanceof multer.MulterError) {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+    if (error.message === "Only JPG and PNG files are allowed") {
+      return res.status(400).json({ success: false, message: error.message });
+    }
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
@@ -101,44 +121,56 @@ router.put("/:id", upload.single("image"), async (req, res) => {
   const { name, price, type, information, status } = req.body;
   const { id } = req.params;
 
-  // Validate required fields
   if (!name || !price || !type || !information) {
     return res.status(400).json({ success: false, message: "All fields are required" });
+  }
+
+  if (!mongoose.isValidObjectId(id)) {
+    return res.status(400).json({ success: false, message: "Invalid printer ID" });
+  }
+
+  const priceNum = Number(price);
+  if (isNaN(priceNum) || priceNum <= 0) {
+    return res.status(400).json({ success: false, message: "Price must be a valid positive number" });
   }
 
   try {
     let updatedPrinter = {
       name,
-      price,
+      price: priceNum,
       type,
       information,
     };
 
-    // If a new image is uploaded, update the image path
     if (req.file) {
-      updatedPrinter.image = `/uploads/${req.file.filename}`;
+      const oldPrinter = await Printer.findById(id);
+      if (oldPrinter && oldPrinter.image) {
+        const publicId = oldPrinter.image.split("/").pop().split(".")[0];
+        await cloudinary.uploader.destroy(`printers/${publicId}`);
+      }
+      updatedPrinter.image = await uploadToCloudinary(req.file);
     }
 
-    // If status is provided, update it
     if (status !== undefined) {
       updatedPrinter.status = status;
     }
 
-    const postUpdateCondition = { _id: id };
-    const printer = await Printer.findOneAndUpdate(postUpdateCondition, updatedPrinter, {
+    const printer = await Printer.findOneAndUpdate({ _id: id }, updatedPrinter, {
       new: true,
     });
 
-    // If printer not found
     if (!printer) {
-      return res.status(404).json({
-        success: false,
-        message: "Printer not found",
-      });
+      return res.status(404).json({ success: false, message: "Printer not found" });
     }
 
     res.json({ success: true, message: "Update successful!", updatedPrinter: printer });
   } catch (error) {
+    if (error instanceof multer.MulterError) {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+    if (error.message === "Only JPG and PNG files are allowed") {
+      return res.status(400).json({ success: false, message: error.message });
+    }
     console.log(error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
@@ -146,15 +178,18 @@ router.put("/:id", upload.single("image"), async (req, res) => {
 
 // Delete a printer
 router.delete("/:id", async (req, res) => {
+  const { id } = req.params;
   try {
-    const postDeleteCondition = { _id: req.params.id };
-    const deletedPrinter = await Printer.findOneAndDelete(postDeleteCondition);
-    // User not authorised or printer not found
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ success: false, message: "Invalid printer ID" });
+    }
+    const deletedPrinter = await Printer.findOneAndDelete({ _id: id });
     if (!deletedPrinter) {
-      return res.status(401).json({
-        success: false,
-        message: "Printer not found or user not authorised",
-      });
+      return res.status(404).json({ success: false, message: "Printer not found" });
+    }
+    if (deletedPrinter.image) {
+      const publicId = deletedPrinter.image.split("/").pop().split(".")[0];
+      await cloudinary.uploader.destroy(`printers/${publicId}`);
     }
     res.json({ success: true, printer: deletedPrinter });
   } catch (error) {

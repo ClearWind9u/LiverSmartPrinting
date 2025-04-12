@@ -2,13 +2,6 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
-import fs from "fs";
-
-// Tạo __filename và __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -25,22 +18,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Create uploads folder if it doesn't exist
-const uploadsDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir);
-}
-
-// Serve static files from the uploads folder
-app.use("/uploads", express.static(uploadsDir));
-
 // Database connection
 const connectDB = async () => {
   try {
     await mongoose.connect(`${process.env.MONGO_URL}`, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      tlsAllowInvalidCertificates: true,
     });
     console.log("MongoDB connected");
   } catch (error) {
@@ -57,6 +40,12 @@ app.use("/printers", printerRouter);
 app.use("/histories", historyRouter);
 app.use("/pages", buyPageRouter);
 app.use("/balance", balancePageRouter);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ success: false, message: "Internal server error" });
+});
 
 const PORT = process.env.PORT || 5000;
 
