@@ -47,7 +47,7 @@ npm run dev
 ### 4. Truy cập phiên bản trực tuyến
 
 👉 Trải nghiệm ứng dụng tại đây:  
-🔗 **[liver-smart-printing.vercel.app](liver-smart-printing.vercel.app)**
+🔗 **[https://liver-smart-printing.vercel.app](https://liver-smart-printing.vercel.app)**
 
 ---
 
